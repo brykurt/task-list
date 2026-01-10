@@ -15,10 +15,15 @@
 
 .filters-section {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
+  flex-direction: column; // stack search box and action row vertically
   gap: 16px;
+  margin-bottom: 24px;
+}
+
+.action-row {
+  display: flex;
+  justify-content: space-between; // left button, right sort
+  align-items: center;
 }
 
 .search-box {
@@ -30,7 +35,6 @@
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   padding: 8px 12px;
-
   mat-icon {
     color: #9ca3af;
   }
@@ -46,6 +50,10 @@
       color: #9ca3af;
     }
   }
+}
+
+.button-container {
+  // no special styles needed, just a wrapper
 }
 
 .sort-section {

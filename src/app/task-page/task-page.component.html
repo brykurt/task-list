@@ -2,6 +2,7 @@
   <h1 class="page-title">Task List Page</h1>
 
   <div class="filters-section">
+    <!-- Search box stays at the top -->
     <div class="search-box">
       <mat-icon>search</mat-icon>
       <input
@@ -12,26 +13,34 @@
       />
     </div>
 
-    <div class="sort-section">
-      <span>Sort by</span>
+    <!-- Row for Add button (left) and Sort menu (right) -->
+    <div class="action-row">
+      <div class="button-container">
+        <button mat-raised-button color="primary">Add Task</button>
+      </div>
 
-      <button mat-button class="sort-button" [matMenuTriggerFor]="sortMenu">
-        {{ selectedSort }}
-        <mat-icon>expand_more</mat-icon>
-      </button>
+      <div class="sort-section">
+        <span>Sort by</span>
+        <button mat-button class="sort-button" [matMenuTriggerFor]="sortMenu">
+          {{ selectedSort }}
+          <mat-icon>expand_more</mat-icon>
+        </button>
 
-      <mat-menu #sortMenu="matMenu">
-        <button mat-menu-item (click)="setSort('Title')">Title</button>
-        <button mat-menu-item (click)="setSort('Date Newest')">
-          Date Newest
-        </button>
-        <button mat-menu-item (click)="setSort('Date Oldest')">
-          Date Oldest
-        </button>
-        <button mat-menu-item (click)="setSort('Status')">Status</button>
-      </mat-menu>
+        <mat-menu #sortMenu="matMenu">
+          <button mat-menu-item (click)="setSort('Title')">Title</button>
+          <button mat-menu-item (click)="setSort('Date Newest')">
+            Date Newest
+          </button>
+          <button mat-menu-item (click)="setSort('Date Oldest')">
+            Date Oldest
+          </button>
+          <button mat-menu-item (click)="setSort('Status')">Status</button>
+        </mat-menu>
+      </div>
     </div>
   </div>
+
+  <!-- Tasks list -->
   <div *ngFor="let task of paginatedTasks">
     <div class="tasks-list" *ngIf="!task.isDeleted">
       <div class="task-item">
@@ -56,6 +65,7 @@
     </div>
   </div>
 
+  <!-- Pagination -->
   <div class="pagination">
     <button
       mat-icon-button
