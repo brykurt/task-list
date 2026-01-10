@@ -102,12 +102,12 @@ export class TaskPageComponent {
     this.searchTerm = value.toLowerCase().trim();
 
     if (!this.searchTerm) {
-      // input is empty → reset tasks to original list
       this.tasks = [...this.allTasks];
     } else {
-      // filter tasks by search term (case-insensitive)
-      this.tasks = this.allTasks.filter((task) =>
-        task.taskTitle.toLowerCase().includes(this.searchTerm)
+      this.tasks = this.allTasks.filter(
+        (task) =>
+          task.taskTitle.toLowerCase().includes(this.searchTerm) ||
+          task.status.toLowerCase().includes(this.searchTerm)
       );
     }
 
