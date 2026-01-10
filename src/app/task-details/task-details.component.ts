@@ -5,7 +5,7 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { CreateEditDialogComponent } from '../create-edit-dialog/create-edit-dialog.component';
-import { DialogTitle } from '../models/share.model';
+import { DialogTitle, Status } from '../models/share.model';
 import { ITask } from '../models/details.model';
 import { ConfirmationModalComponent } from '../confirmation-modal/confirmation-modal.component';
 
@@ -15,6 +15,11 @@ import { ConfirmationModalComponent } from '../confirmation-modal/confirmation-m
   styleUrls: ['./task-details.component.scss'],
 })
 export class TaskDetailsComponent implements OnInit {
+  taskTitle = this.data.taskTitle;
+  description = this.data.description;
+  status = this.data.status;
+  createdDate = this.data.createdDate;
+  statuses = Status;
   constructor(
     public dialogRef: MatDialogRef<TaskDetailsComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ITask,
@@ -38,16 +43,20 @@ export class TaskDetailsComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result: ITask) => {
       if (result) {
-        this.data.taskTitle = result.taskTitle;
-        this.data.description = result.description;
-        this.data.status = result.status;
-        this.dialogRef.close(this.data);
+        this.taskTitle = result.taskTitle;
+        this.description = result.description;
+        this.status = result.status;
       }
     });
   }
 
   closeDialog() {
-    this.dialogRef.close();
+    this.dialogRef.close({
+      taskTitle: this.taskTitle,
+      description: this.description,
+      status: this.status,
+      isDeleted: false,
+    });
   }
 
   openDeleteDialog() {

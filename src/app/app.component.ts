@@ -36,10 +36,21 @@ export class AppComponent {
   constructor(public dialog: MatDialog) {}
 
   openTaskDetails(task: ITask): void {
-    this.dialog.open(TaskDetailsComponent, {
+    const dialogRef = this.dialog.open(TaskDetailsComponent, {
       data: task,
       panelClass: 'task-details-dialog',
       disableClose: true,
+    });
+
+    dialogRef.afterClosed().subscribe((result: ITask) => {
+      if (result) {
+        const selectedTask = this.tasks?.find((t) => t === task);
+        if (selectedTask) {
+          selectedTask.taskTitle = result.taskTitle;
+          selectedTask.description = result.description;
+          selectedTask.status = result.status;
+        }
+      }
     });
   }
 

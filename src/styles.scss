@@ -21,3 +21,18 @@ body {
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
+
+.chip-done {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important;
+}
+
+.chip-pending {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+.chip-in-progress {
+  background-color: #dbeafe !important;
+  color: #0c4a6e !important;
+}

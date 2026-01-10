@@ -5,14 +5,19 @@
   </button>
 
   <div class="task-card">
-    <h1 class="task-title">{{ data.taskTitle }}</h1>
+    <h1 class="task-title">{{ taskTitle }}</h1>
 
     <div class="task-status">
-      <mat-chip class="status-chip done">{{ data.status }}</mat-chip>
+      <mat-chip
+        [class.chip-done]="status === statuses.DONE"
+        [class.chip-pending]="status === statuses.PENDING"
+        [class.chip-in-progress]="status === statuses.IN_PROGRESS"
+        >{{ status }}</mat-chip
+      >
     </div>
 
     <p class="task-description">
-      {{ data.description }}
+      {{ description }}
     </p>
 
     <p class="task-created">

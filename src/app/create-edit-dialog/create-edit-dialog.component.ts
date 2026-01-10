@@ -48,7 +48,7 @@ export class CreateEditDialogComponent implements OnInit {
       const formValue = this.form.value;
       const result = {
         ...formValue,
-        createdDate: new Date(), // Add current date/time
+        createdDate: new Date(),
       };
       this.dialogRef.close(result);
     } else {
