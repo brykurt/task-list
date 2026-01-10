@@ -15,18 +15,27 @@
       </button>
     </div>
   </div>
-
-  <div class="tasks-list">
-    <div class="task-item" *ngFor="let task of paginatedTasks">
-      <div class="task-content">
-        <h3 class="task-title">{{ task.taskTitle }}</h3>
-        <mat-chip [ngClass]="'chip-' + (task.status | lowercase)">
-          {{ task.status }}
-        </mat-chip>
+  <div *ngFor="let task of paginatedTasks">
+    <div class="tasks-list" *ngIf="!task.isDeleted">
+      <div class="task-item">
+        <div class="task-content">
+          <h3 class="task-title">{{ task.taskTitle }}</h3>
+          <mat-chip
+            [class.chip-done]="task.status === statuses.DONE"
+            [class.chip-pending]="task.status === statuses.PENDING"
+            [class.chip-in-progress]="task.status === statuses.IN_PROGRESS"
+          >
+            {{ task.status }}
+          </mat-chip>
+        </div>
+        <button
+          mat-button
+          class="details-button"
+          (click)="openTaskDetails(task)"
+        >
+          Details
+        </button>
       </div>
-      <button mat-button class="details-button" (click)="openTaskDetails(task)">
-        Details
-      </button>
     </div>
   </div>
 

@@ -60,16 +60,15 @@
 .task-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
   margin-top: 20px;
   border-top: 1px solid #e5e7eb;
   padding-top: 16px;
 
   .edit-btn {
-    color: #2563eb;
+    border: 1px solid #e5e7eb;
   }
 
   .delete-btn {
-    color: #ef4444;
+    border: 1px solid #e5e7eb;
   }
 }
