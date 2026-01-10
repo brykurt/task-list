@@ -45,6 +45,7 @@
       class="prev-button"
       [disabled]="currentPage === 1"
       (click)="previousPage()"
+      *ngIf="totalPages > 1"
     >
       <mat-icon>chevron_left</mat-icon>
     </button>
@@ -62,6 +63,7 @@
       class="next-button"
       [disabled]="currentPage === totalPages"
       (click)="nextPage()"
+      *ngIf="totalPages > 1"
     >
       <mat-icon>chevron_right</mat-icon>
     </button>
