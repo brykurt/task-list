@@ -4,7 +4,12 @@
   <div class="filters-section">
     <div class="search-box">
       <mat-icon>search</mat-icon>
-      <input type="text" placeholder="Search" class="search-input" />
+      <input
+        type="text"
+        placeholder="Search"
+        (keyup)="onSearchTermChange($event)"
+        class="search-input"
+      />
     </div>
 
     <div class="sort-section">

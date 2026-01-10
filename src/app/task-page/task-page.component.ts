@@ -14,6 +14,8 @@ export class TaskPageComponent {
   statuses = Status;
   title = 'task-list-app';
   tasks = TASKS;
+  searchTerm: string = '';
+  allTasks: ITask[] = TASKS;
   selectedSort: 'Title' | 'Date Newest' | 'Date Oldest' | 'Status' = 'Title';
   currentPage = 1;
   itemsPerPage = 3;
@@ -93,5 +95,23 @@ export class TaskPageComponent {
     }
 
     this.currentPage = 1;
+  }
+
+  onSearchTermChange(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.searchTerm = value.toLowerCase().trim();
+
+    if (!this.searchTerm) {
+      // input is empty → reset tasks to original list
+      this.tasks = [...this.allTasks];
+    } else {
+      // filter tasks by search term (case-insensitive)
+      this.tasks = this.allTasks.filter((task) =>
+        task.taskTitle.toLowerCase().includes(this.searchTerm)
+      );
+    }
+
+    this.currentPage = 1;
+    console.log('Search term', this.searchTerm);
   }
 }
