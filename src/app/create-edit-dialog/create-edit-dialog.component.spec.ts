@@ -52,14 +52,44 @@ describe('CreateEditDialogComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should call ngOnInit', () => {
-    const spy = spyOn(component, 'ngOnInit');
-    component.ngOnInit();
-    expect(spy).toHaveBeenCalled();
-  });
-
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should initialize form with empty values when creating is true', () => {
+    component.ngOnInit();
+
+    expect(component.form.value).toEqual({
+      taskTitle: '',
+      description: '',
+      status: Status.PENDING,
+    });
+
+    // Validators
+    expect(component.form.controls['taskTitle'].valid).toBeFalse();
+    expect(component.form.controls['status'].valid).toBeTrue(); // has default PENDING
+  });
+
+  it('should initialize form with existing data when creating is false', () => {
+    // Override MAT_DIALOG_DATA
+    component.data = {
+      creating: false,
+      taskTitle: 'Existing Task',
+      description: 'Existing Description',
+      status: Status.IN_PROGRESS,
+    };
+
+    component.ngOnInit();
+
+    expect(component.form.value).toEqual({
+      taskTitle: 'Existing Task',
+      description: 'Existing Description',
+      status: Status.IN_PROGRESS,
+    });
+
+    // Validators
+    expect(component.form.controls['taskTitle'].valid).toBeTrue();
+    expect(component.form.controls['status'].valid).toBeTrue();
   });
 
   it('should close dialog without returning data when onClose is called', () => {

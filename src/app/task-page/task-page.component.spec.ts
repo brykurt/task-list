@@ -73,6 +73,8 @@ describe('TaskPageComponent', () => {
     component.openTaskDetails(task);
   });
 
+  it('should open ');
+
   it('should call ngOnInit', () => {
     const spy = spyOn(component, 'ngOnInit');
     component.ngOnInit();
@@ -174,5 +176,45 @@ describe('TaskPageComponent', () => {
       component.setSort('Status');
       expect(component.currentPage).toBe(1);
     });
+  });
+
+  it('should update tasks and searchTerm when onSearchTermChange is called', () => {
+    // Arrange: setup allTasks
+    component.allTasks = [
+      { taskTitle: 'Task One', status: 'Pending', isDeleted: false } as any,
+      { taskTitle: 'Task Two', status: 'Completed', isDeleted: false } as any,
+      {
+        taskTitle: 'Another Task',
+        status: 'In Progress',
+        isDeleted: false,
+      } as any,
+    ];
+
+    // 1️⃣ Simulate typing a search term that matches task titles
+    const eventTitle = { target: { value: 'Another' } } as unknown as Event;
+    component.onSearchTermChange(eventTitle);
+
+    expect(component.searchTerm).toBe('another');
+    expect(component.tasks.length).toBe(1);
+    expect(component.tasks[0].taskTitle).toBe('Another Task');
+    expect(component.currentPage).toBe(1);
+
+    // 2️⃣ Simulate typing a search term that matches task status
+    const eventStatus = { target: { value: 'completed' } } as unknown as Event;
+    component.onSearchTermChange(eventStatus);
+
+    expect(component.searchTerm).toBe('completed');
+    expect(component.tasks.length).toBe(1);
+    expect(component.tasks[0].status).toBe('Completed');
+    expect(component.currentPage).toBe(1);
+
+    // 3️⃣ Simulate clearing the search term
+    const eventClear = { target: { value: '' } } as unknown as Event;
+    component.onSearchTermChange(eventClear);
+
+    expect(component.searchTerm).toBe('');
+    expect(component.tasks.length).toBe(3); // all tasks restored
+    expect(component.tasks).toEqual(component.allTasks);
+    expect(component.currentPage).toBe(1);
   });
 });

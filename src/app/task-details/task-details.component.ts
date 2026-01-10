@@ -14,7 +14,7 @@ import { ConfirmationModalComponent } from '../confirmation-modal/confirmation-m
   templateUrl: './task-details.component.html',
   styleUrls: ['./task-details.component.scss'],
 })
-export class TaskDetailsComponent implements OnInit {
+export class TaskDetailsComponent {
   taskTitle = this.data.taskTitle;
   description = this.data.description;
   status = this.data.status;
@@ -25,8 +25,6 @@ export class TaskDetailsComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: ITask,
     public dialog: MatDialog
   ) {}
-
-  ngOnInit(): void {}
 
   openEditDialog() {
     const dialogRef = this.dialog.open(CreateEditDialogComponent, {

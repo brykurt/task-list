@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { of } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { DialogTitle, Status } from '../models/share.model';
 
 describe('TaskDetailsComponent', () => {
   let component: TaskDetailsComponent;
@@ -70,12 +71,55 @@ describe('TaskDetailsComponent', () => {
   });
 
   it('should update the data when openEditDialog is closed', () => {
+    // Set initial component data
+    component.data = {
+      taskTitle: 'Original Task',
+      description: 'Original Description',
+      status: Status.PENDING,
+      isDeleted: false,
+      creating: false,
+    };
+
+    // Mock dialogRef to return updated task data
     const dialogRefSpyObj = jasmine.createSpyObj({
-      afterClosed: of({ taskTitle: 'Updated Task' }),
+      afterClosed: of({
+        taskTitle: 'Updated Task',
+        description: 'Updated Description',
+        status: Status.DONE,
+      }),
     });
 
     dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
+
     component.openEditDialog();
+
+    expect(dialogSpy.open).toHaveBeenCalledWith(
+      jasmine.any(Function), // the dialog component
+      jasmine.objectContaining({
+        data: {
+          dialogTitle: DialogTitle.EDIT,
+          taskTitle: 'Original Task',
+          description: 'Original Description',
+          status: Status.PENDING,
+          creating: false,
+        },
+        panelClass: 'dialog-content',
+        disableClose: true,
+      })
+    );
+
+    // Verify component properties were updated
+    expect(component.taskTitle).toBe('Updated Task');
+    expect(component.description).toBe('Updated Description');
+    expect(component.status).toBe(Status.DONE);
+  });
+
+  it('should delete the data when confirmed', () => {
+    const dialogRefSpyObj = jasmine.createSpyObj({
+      afterClosed: of(true),
+    });
+    dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
+    component.openDeleteDialog();
     expect(dialogSpy.open).toHaveBeenCalled();
   });
 
