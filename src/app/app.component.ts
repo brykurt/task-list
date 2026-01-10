@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
+import { Status } from './models/share.model';
+import { ITask } from './models/details.model';
 import { MatDialog } from '@angular/material/dialog';
-import { CreateEditDialogComponent } from './create-edit-dialog/create-edit-dialog.component';
-import { DialogTitle } from './interfaces/dialog.model';
+import { TaskDetailsComponent } from './task-details/task-details.component';
+import { TASKS } from './constants/mock';
 
 @Component({
   selector: 'app-root',
@@ -9,22 +11,53 @@ import { DialogTitle } from './interfaces/dialog.model';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent {
+  statuses = Status;
   title = 'task-list-app';
+  tasks = TASKS;
+
+  currentPage = 1;
+  itemsPerPage = 3;
+
+  get totalPages(): number {
+    return Math.ceil(
+      this.tasks.filter((task) => !task.isDeleted).length / this.itemsPerPage
+    );
+  }
+
+  get paginatedTasks(): ITask[] {
+    const visibleTasks = this.tasks.filter((task) => !task.isDeleted);
+
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+
+    return visibleTasks.slice(startIndex, endIndex);
+  }
+
   constructor(public dialog: MatDialog) {}
 
-  openDialog() {
-    const dialogRef = this.dialog.open(CreateEditDialogComponent, {
-      data: {
-        dialogTitle: DialogTitle.CREATE,
-        creating: true,
-      },
-      panelClass: 'dialog-content',
+  openTaskDetails(task: ITask): void {
+    this.dialog.open(TaskDetailsComponent, {
+      data: task,
+      panelClass: 'task-details-dialog',
       disableClose: true,
     });
+  }
 
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log('Result', result);
-      console.log('The dialog was closed');
-    });
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+    }
   }
 }

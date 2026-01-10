@@ -1,5 +1,5 @@
 export interface IDialogData {
-  dialogTitle: DialogTitle;
+  dialogTitle?: DialogTitle;
   taskTitle: string;
   description: string;
   status: Status;

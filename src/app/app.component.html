@@ -1,1 +1,69 @@
-<button mat-button (click)="openDialog()">Create Task</button>
+<div class="task-list-container">
+  <h1 class="page-title">Task List Page</h1>
+
+  <div class="filters-section">
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input type="text" placeholder="Search" class="search-input" />
+    </div>
+
+    <div class="sort-section">
+      <span>Sort by</span>
+      <button mat-button class="sort-button">
+        Title
+        <mat-icon>expand_more</mat-icon>
+      </button>
+    </div>
+  </div>
+  <div *ngFor="let task of paginatedTasks">
+    <div class="tasks-list" *ngIf="!task.isDeleted">
+      <div class="task-item">
+        <div class="task-content">
+          <h3 class="task-title">{{ task.taskTitle }}</h3>
+          <mat-chip
+            [class.chip-done]="task.status === statuses.DONE"
+            [class.chip-pending]="task.status === statuses.PENDING"
+            [class.chip-in-progress]="task.status === statuses.IN_PROGRESS"
+          >
+            {{ task.status }}
+          </mat-chip>
+        </div>
+        <button
+          mat-button
+          class="details-button"
+          (click)="openTaskDetails(task)"
+        >
+          Details
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pagination">
+    <button
+      mat-icon-button
+      class="prev-button"
+      [disabled]="currentPage === 1"
+      (click)="previousPage()"
+    >
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <button
+      mat-mini-fab
+      class="page-button"
+      *ngFor="let page of [].constructor(totalPages); let i = index"
+      [ngClass]="{ active: currentPage === i + 1 }"
+      (click)="goToPage(i + 1)"
+    >
+      {{ i + 1 }}
+    </button>
+    <button
+      mat-icon-button
+      class="next-button"
+      [disabled]="currentPage === totalPages"
+      (click)="nextPage()"
+    >
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+</div>
