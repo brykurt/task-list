@@ -16,7 +16,9 @@
     <!-- Row for Add button (left) and Sort menu (right) -->
     <div class="action-row">
       <div class="button-container">
-        <button mat-raised-button color="primary">Add Task</button>
+        <button mat-raised-button color="primary" (click)="addTask()">
+          Add Task
+        </button>
       </div>
 
       <div class="sort-section">

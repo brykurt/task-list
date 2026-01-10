@@ -2,8 +2,10 @@ import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TASKS } from 'src/app/constants/mock';
 import { ITask } from 'src/app/models/details.model';
-import { Status } from 'src/app/models/share.model';
+import { DialogTitle, Status } from 'src/app/models/share.model';
 import { TaskDetailsComponent } from '../task-details/task-details.component';
+import { CreateEditDialogComponent } from '../create-edit-dialog/create-edit-dialog.component';
+import { Dialog } from '@angular/cdk/dialog';
 
 @Component({
   selector: 'app-task-page',
@@ -112,6 +114,24 @@ export class TaskPageComponent {
     }
 
     this.currentPage = 1;
-    console.log('Search term', this.searchTerm);
+  }
+
+  addTask(): void {
+    const dialogRef = this.dialog.open(CreateEditDialogComponent, {
+      data: {
+        dialogTitle: DialogTitle.CREATE,
+        taskTitle: '',
+        description: '',
+        status: Status.PENDING,
+        creating: true,
+      },
+      panelClass: 'dialog-content',
+      disableClose: true,
+    });
+    dialogRef.afterClosed().subscribe((result: ITask) => {
+      if (result) {
+        this.allTasks.push(result);
+      }
+    });
   }
 }

@@ -12,9 +12,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { TaskPageComponent } from './task-page.component';
 import { of } from 'rxjs';
-import { Status } from '../models/share.model';
+import { DialogTitle, Status } from '../models/share.model';
 import { ITask } from '../models/details.model';
 import { TASKS } from '../constants/mock';
+import { CreateEditDialogComponent } from '../create-edit-dialog/create-edit-dialog.component';
 
 describe('TaskPageComponent', () => {
   let component: TaskPageComponent;
@@ -72,8 +73,6 @@ describe('TaskPageComponent', () => {
     dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
     component.openTaskDetails(task);
   });
-
-  it('should open ');
 
   it('should call ngOnInit', () => {
     const spy = spyOn(component, 'ngOnInit');
@@ -179,42 +178,64 @@ describe('TaskPageComponent', () => {
   });
 
   it('should update tasks and searchTerm when onSearchTermChange is called', () => {
-    // Arrange: setup allTasks
-    component.allTasks = [
-      { taskTitle: 'Task One', status: 'Pending', isDeleted: false } as any,
-      { taskTitle: 'Task Two', status: 'Completed', isDeleted: false } as any,
-      {
-        taskTitle: 'Another Task',
-        status: 'In Progress',
-        isDeleted: false,
-      } as any,
-    ];
+    component.allTasks = TASKS;
 
-    // 1️⃣ Simulate typing a search term that matches task titles
-    const eventTitle = { target: { value: 'Another' } } as unknown as Event;
+    const eventTitle = {
+      target: { value: 'Update Dependencies' },
+    } as unknown as Event;
     component.onSearchTermChange(eventTitle);
 
-    expect(component.searchTerm).toBe('another');
+    expect(component.searchTerm).toBe('update dependencies');
     expect(component.tasks.length).toBe(1);
-    expect(component.tasks[0].taskTitle).toBe('Another Task');
     expect(component.currentPage).toBe(1);
 
-    // 2️⃣ Simulate typing a search term that matches task status
-    const eventStatus = { target: { value: 'completed' } } as unknown as Event;
+    const eventStatus = { target: { value: Status.DONE } } as unknown as Event;
     component.onSearchTermChange(eventStatus);
 
-    expect(component.searchTerm).toBe('completed');
-    expect(component.tasks.length).toBe(1);
-    expect(component.tasks[0].status).toBe('Completed');
+    expect(component.searchTerm).toBe('done');
+    expect(component.tasks[0].status).toBe(Status.DONE);
     expect(component.currentPage).toBe(1);
 
-    // 3️⃣ Simulate clearing the search term
     const eventClear = { target: { value: '' } } as unknown as Event;
     component.onSearchTermChange(eventClear);
 
     expect(component.searchTerm).toBe('');
-    expect(component.tasks.length).toBe(3); // all tasks restored
     expect(component.tasks).toEqual(component.allTasks);
     expect(component.currentPage).toBe(1);
+  });
+
+  it('should open create dialog and add new task on close', () => {
+    const newTask: ITask = {
+      taskTitle: 'New Task',
+      description: 'New task description',
+      status: Status.PENDING,
+      isDeleted: false,
+      creating: true,
+      createdDate: new Date(),
+    };
+
+    const dialogRefSpyObj = jasmine.createSpyObj({
+      afterClosed: of(newTask),
+    });
+
+    dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
+    const initialLength = component.allTasks.length;
+
+    component.addTask();
+
+    expect(dialogSpy.open).toHaveBeenCalledWith(CreateEditDialogComponent, {
+      data: {
+        dialogTitle: DialogTitle.CREATE,
+        taskTitle: '',
+        description: '',
+        status: Status.PENDING,
+        creating: true,
+      },
+      panelClass: 'dialog-content',
+      disableClose: true,
+    });
+
+    expect(component.allTasks.length).toBe(initialLength + 1);
+    expect(component.allTasks).toContain(newTask);
   });
 });
