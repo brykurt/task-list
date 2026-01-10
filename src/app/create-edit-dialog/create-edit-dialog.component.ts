@@ -37,7 +37,7 @@ export class CreateEditDialogComponent implements OnInit {
         this.data.creating ? '' : this.data.description
       ),
       status: new FormControl(
-        this.data.creating ? 'PENDING' : this.data.status,
+        this.data.creating ? Status.PENDING : this.data.status,
         [Validators.required]
       ),
     });

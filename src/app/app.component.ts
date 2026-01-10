@@ -19,6 +19,7 @@ export class AppComponent {
         creating: true,
       },
       panelClass: 'dialog-content',
+      disableClose: true,
     });
 
     dialogRef.afterClosed().subscribe((result) => {
