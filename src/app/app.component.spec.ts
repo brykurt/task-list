@@ -1,12 +1,19 @@
 import { TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
+import { MatDialogModule } from '@angular/material/dialog';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
+import { CreateEditDialogComponent } from './create-edit-dialog/create-edit-dialog.component';
+import { DialogTitle } from './interfaces/dialog.model';
+import { of } from 'rxjs/internal/observable/of';
 
 describe('AppComponent', () => {
-  beforeEach(() => TestBed.configureTestingModule({
-    imports: [RouterTestingModule],
-    declarations: [AppComponent]
-  }));
+  beforeEach(() =>
+    TestBed.configureTestingModule({
+      imports: [RouterTestingModule, MatDialogModule, BrowserAnimationsModule],
+      declarations: [AppComponent, CreateEditDialogComponent],
+    })
+  );
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(AppComponent);
@@ -20,10 +27,22 @@ describe('AppComponent', () => {
     expect(app.title).toEqual('task-list-app');
   });
 
-  it('should render title', () => {
+  it('should open dialog with correct configuration', () => {
     const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('task-list-app app is running!');
+    const app = fixture.componentInstance;
+    spyOn(app.dialog, 'open').and.returnValue({
+      afterClosed: () => of(undefined),
+    } as any);
+
+    app.openDialog();
+
+    expect(app.dialog.open).toHaveBeenCalledWith(CreateEditDialogComponent, {
+      data: {
+        dialogTitle: DialogTitle.CREATE,
+        creating: true,
+      },
+      panelClass: 'dialog-content',
+      disableClose: true,
+    });
   });
 });

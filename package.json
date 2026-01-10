@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test --code-coverage",
+    "format": "prettier --write \"src/**/*.{ts,html,scss,css,json}\""
   },
   "private": true,
   "dependencies": {

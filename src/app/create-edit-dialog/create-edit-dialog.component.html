@@ -1,1 +1,60 @@
-<p>create-edit-dialog works!</p>
+<div class="parent">
+  <h1>{{ data.dialogTitle }}</h1>
+  <form
+    [formGroup]="form"
+    (ngSubmit)="onSave()"
+    class="dialog-form"
+    role="form"
+  >
+    <mat-dialog-content>
+      <h3>Task Title</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <input matInput placeholder="Enter title" formControlName="taskTitle" />
+        <mat-error
+          *ngIf="
+            form.get('taskTitle')?.hasError('required') &&
+            form.get('taskTitle')?.touched
+          "
+        >
+          Title is required
+        </mat-error>
+      </mat-form-field>
+
+      <h3>Description</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <textarea
+          matInput
+          placeholder="Enter Description"
+          formControlName="description"
+        ></textarea>
+      </mat-form-field>
+
+      <h3>Status</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-select formControlName="status">
+          <mat-option
+            *ngFor="let status of statusOptions"
+            [value]="status.displayValue"
+          >
+            {{ status.displayValue }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button class="cancel-btn" type="button" mat-button (click)="onClose()">
+        Cancel
+      </button>
+      <button
+        class="save-btn"
+        type="submit"
+        mat-raised-button
+        color="primary"
+        [disabled]="form.invalid"
+      >
+        Save
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div>
