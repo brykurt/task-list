@@ -9,10 +9,22 @@
 
     <div class="sort-section">
       <span>Sort by</span>
-      <button mat-button class="sort-button">
-        Title
+
+      <button mat-button class="sort-button" [matMenuTriggerFor]="sortMenu">
+        {{ selectedSort }}
         <mat-icon>expand_more</mat-icon>
       </button>
+
+      <mat-menu #sortMenu="matMenu">
+        <button mat-menu-item (click)="setSort('Title')">Title</button>
+        <button mat-menu-item (click)="setSort('Date Newest')">
+          Date Newest
+        </button>
+        <button mat-menu-item (click)="setSort('Date Oldest')">
+          Date Oldest
+        </button>
+        <button mat-menu-item (click)="setSort('Status')">Status</button>
+      </mat-menu>
     </div>
   </div>
   <div *ngFor="let task of paginatedTasks">

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Status } from './models/share.model';
 import { ITask } from './models/details.model';
 import { MatDialog } from '@angular/material/dialog';
@@ -10,14 +10,17 @@ import { TASKS } from './constants/mock';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   statuses = Status;
   title = 'task-list-app';
   tasks = TASKS;
-
+  selectedSort: 'Title' | 'Date Newest' | 'Date Oldest' | 'Status' = 'Title';
   currentPage = 1;
   itemsPerPage = 3;
 
+  ngOnInit(): void {
+    this.setSort(this.selectedSort);
+  }
   get totalPages(): number {
     return Math.ceil(
       this.tasks.filter((task) => !task.isDeleted).length / this.itemsPerPage
@@ -70,5 +73,25 @@ export class AppComponent {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
     }
+  }
+
+  setSort(sortBy: 'Title' | 'Date Newest' | 'Date Oldest' | 'Status'): void {
+    this.selectedSort = sortBy;
+
+    const comparators: Record<string, (a: ITask, b: ITask) => number> = {
+      Title: (a, b) => a.taskTitle.localeCompare(b.taskTitle),
+      'Date Newest': (a, b) =>
+        b.createdDate!.getTime() - a.createdDate!.getTime(),
+      'Date Oldest': (a, b) =>
+        a.createdDate!.getTime() - b.createdDate!.getTime(),
+      Status: (a, b) => a.status.localeCompare(b.status),
+    };
+
+    const comparator = comparators[sortBy];
+    if (comparator) {
+      this.tasks.sort(comparator);
+    }
+
+    this.currentPage = 1;
   }
 }
