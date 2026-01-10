@@ -14,9 +14,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { TaskDetailsComponent } from './task-details/task-details.component';
+import { ConfirmationModalComponent } from './confirmation-modal/confirmation-modal.component';
 
 @NgModule({
-  declarations: [AppComponent, CreateEditDialogComponent, TaskDetailsComponent],
+  declarations: [AppComponent, CreateEditDialogComponent, TaskDetailsComponent, ConfirmationModalComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,

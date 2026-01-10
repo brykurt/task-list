@@ -7,6 +7,7 @@ import {
 import { CreateEditDialogComponent } from '../create-edit-dialog/create-edit-dialog.component';
 import { DialogTitle } from '../models/share.model';
 import { ITask } from '../models/details.model';
+import { ConfirmationModalComponent } from '../confirmation-modal/confirmation-modal.component';
 
 @Component({
   selector: 'app-task-details',
@@ -26,16 +27,37 @@ export class TaskDetailsComponent implements OnInit {
     const dialogRef = this.dialog.open(CreateEditDialogComponent, {
       data: {
         dialogTitle: DialogTitle.EDIT,
+        taskTitle: this.data.taskTitle,
+        description: this.data.description,
+        status: this.data.status,
         creating: false,
       },
       panelClass: 'dialog-content',
       disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe((result) => {});
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.data.taskTitle = result.taskTitle;
+        this.data.description = result.description;
+        this.data.status = result.status;
+        this.dialogRef.close(this.data);
+      }
+    });
   }
 
   closeDialog() {
     this.dialogRef.close();
+  }
+
+  openDeleteDialog() {
+    const dialogRef = this.dialog.open(ConfirmationModalComponent);
+
+    dialogRef.afterClosed().subscribe((confirm: boolean) => {
+      if (confirm) {
+        this.data.isDeleted = true;
+        this.dialogRef.close(this.data);
+      }
+    });
   }
 }
