@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { IDialogData, Status } from '../interfaces/dialog.model';
+import { IDialogData, Status } from '../models/share.model';
 import {
   Form,
   FormBuilder,
@@ -45,7 +45,12 @@ export class CreateEditDialogComponent implements OnInit {
 
   onSave(): void {
     if (this.form.valid) {
-      this.dialogRef.close(this.form.value);
+      const formValue = this.form.value;
+      const result = {
+        ...formValue,
+        createdDate: new Date(), // Add current date/time
+      };
+      this.dialogRef.close(result);
     } else {
       this.form.markAllAsTouched();
     }

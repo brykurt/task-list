@@ -9,7 +9,31 @@ body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
+/* Chip Status Colors */
+.chip-done {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.chip-pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.chip-in-progress {
+  background-color: #dbeafe;
+  color: #0c4a6e;
+}
+
 .dialog-content {
   height: 600px !important;
   width: 400px !important;
+}
+
+.task-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
