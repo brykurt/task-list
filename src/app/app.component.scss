@@ -111,9 +111,11 @@
   }
 
   .details-button {
-    color: #2563eb;
     font-weight: 500;
     margin-left: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    padding: 4px 8px;
   }
 }
 
