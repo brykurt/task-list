@@ -23,7 +23,7 @@ export class TaskDetailsComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  openDialog() {
+  openEditDialog() {
     const dialogRef = this.dialog.open(CreateEditDialogComponent, {
       data: {
         dialogTitle: DialogTitle.EDIT,
@@ -36,7 +36,7 @@ export class TaskDetailsComponent implements OnInit {
       disableClose: true,
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
+    dialogRef.afterClosed().subscribe((result: ITask) => {
       if (result) {
         this.data.taskTitle = result.taskTitle;
         this.data.description = result.description;
