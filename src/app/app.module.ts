@@ -16,12 +16,15 @@ import { MatChipsModule } from '@angular/material/chips';
 import { TaskDetailsComponent } from './task-details/task-details.component';
 import { ConfirmationModalComponent } from './confirmation-modal/confirmation-modal.component';
 import { MatMenuModule } from '@angular/material/menu';
+import { TaskPageComponent } from './task-page/task-page.component';
+import { CommonModule } from '@angular/common';
 @NgModule({
   declarations: [
     AppComponent,
     CreateEditDialogComponent,
     TaskDetailsComponent,
     ConfirmationModalComponent,
+    TaskPageComponent,
   ],
   imports: [
     BrowserModule,
@@ -36,6 +39,7 @@ import { MatMenuModule } from '@angular/material/menu';
     MatIconModule,
     MatChipsModule,
     MatMenuModule,
+    CommonModule,
   ],
   providers: [],
   bootstrap: [AppComponent],
