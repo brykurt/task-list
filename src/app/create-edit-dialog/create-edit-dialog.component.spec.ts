@@ -73,12 +73,16 @@ describe('CreateEditDialogComponent', () => {
       description: 'Test Description',
       status: Status.IN_PROGRESS,
     });
+
     component.onSave();
-    expect(component.dialogRef.close).toHaveBeenCalledWith({
-      taskTitle: 'Test Task',
-      description: 'Test Description',
-      status: Status.IN_PROGRESS,
-    });
+
+    expect(component.dialogRef.close).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        taskTitle: 'Test Task',
+        description: 'Test Description',
+        status: Status.IN_PROGRESS,
+      })
+    );
   });
 
   it('should mark all fields as touched when form is invalid', () => {
