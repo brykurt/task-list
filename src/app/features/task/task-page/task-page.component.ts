@@ -35,15 +35,9 @@ export class TaskPageComponent {
   get tasks(): ITask[] {
     return this.taskService.visibleTasks();
   }
-  set tasks(value: ITask[]) {
-    // Kept for backward compatibility with tests
-  }
 
   get allTasks(): ITask[] {
     return this.taskService.getTasks();
-  }
-  set allTasks(value: ITask[]) {
-    // Kept for backward compatibility with tests
   }
 
   get searchTerm(): string {

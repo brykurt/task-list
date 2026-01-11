@@ -664,38 +664,4 @@ describe('TaskPageComponent', () => {
     const result = component.trackByTaskTitle(0, task);
     expect(result).toBe('Test Task' + undefined);
   });
-
-  it('should have backward compatible task setter that does nothing', () => {
-    const newTasks: ITask[] = [
-      {
-        taskTitle: 'New Task',
-        description: 'Desc',
-        status: Status.PENDING,
-        createdDate: new Date(),
-        creating: false,
-        isDeleted: false,
-      },
-    ];
-
-    const initialTasks = component.tasks;
-    component.tasks = newTasks;
-    expect(component.tasks).toEqual(initialTasks);
-  });
-
-  it('should have backward compatible allTasks setter that does nothing', () => {
-    const newTasks: ITask[] = [
-      {
-        taskTitle: 'New Task',
-        description: 'Desc',
-        status: Status.PENDING,
-        createdDate: new Date(),
-        creating: false,
-        isDeleted: false,
-      },
-    ];
-
-    const initialAllTasks = component.allTasks;
-    component.allTasks = newTasks;
-    expect(component.allTasks).toEqual(initialAllTasks);
-  });
 });
