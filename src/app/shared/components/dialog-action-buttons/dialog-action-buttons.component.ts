@@ -20,6 +20,8 @@ export class DialogActionButtonsComponent {
   @Input() secondaryType: 'button' | 'submit' = 'button';
   @Input() primaryDisabled = false;
   @Input() secondaryDisabled = false;
+  @Input() primaryAriaLabel?: string;
+  @Input() secondaryAriaLabel?: string;
 
   @Output() primaryClick = new EventEmitter<void>();
   @Output() secondaryClick = new EventEmitter<void>();

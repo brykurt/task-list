@@ -44,15 +44,20 @@ export class CreateEditDialogComponent implements OnInit {
   }
 
   onSave(): void {
-    if (this.form.valid) {
-      const formValue = this.form.value;
-      const result = {
-        ...formValue,
-        createdDate: new Date(),
-      };
-      this.dialogRef.close(result);
-    } else {
-      this.form.markAllAsTouched();
+    try {
+      if (this.form.valid) {
+        const formValue = this.form.value;
+        const result = {
+          ...formValue,
+          createdDate: new Date(),
+        };
+        this.dialogRef.close(result);
+      } else {
+        this.form.markAllAsTouched();
+      }
+    } catch (error) {
+      console.error('Error saving task:', error);
+      this.form.setErrors({ saveError: true });
     }
   }
 
