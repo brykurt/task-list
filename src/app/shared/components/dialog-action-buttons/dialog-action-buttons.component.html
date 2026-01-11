@@ -1,0 +1,19 @@
+<mat-dialog-actions align="end">
+  <button
+    mat-button
+    [type]="secondaryType"
+    [disabled]="secondaryDisabled"
+    (click)="secondaryClick.emit()"
+  >
+    {{ secondaryLabel }}
+  </button>
+  <button
+    mat-raised-button
+    [color]="primaryColor"
+    [type]="primaryType"
+    [disabled]="primaryDisabled"
+    (click)="primaryClick.emit()"
+  >
+    {{ primaryLabel }}
+  </button>
+</mat-dialog-actions>

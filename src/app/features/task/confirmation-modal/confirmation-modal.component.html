@@ -1,15 +1,9 @@
 <h2 matDialogTitle>Are you sure you want to delete this task?</h2>
 
-<mat-dialog-actions align="end">
-  <button class="cancel-btn" type="button" mat-button (click)="onClose(false)">
-    Cancel
-  </button>
-  <button
-    type="submit"
-    mat-raised-button
-    color="primary"
-    (click)="onClose(true)"
-  >
-    Confirm
-  </button>
-</mat-dialog-actions>
+<app-dialog-action-buttons
+  secondaryLabel="Cancel"
+  primaryLabel="Confirm"
+  primaryColor="primary"
+  (secondaryClick)="onClose(false)"
+  (primaryClick)="onClose(true)"
+></app-dialog-action-buttons>

@@ -14,6 +14,7 @@ import { TaskPageComponent } from './task-page/task-page.component';
 import { CreateEditDialogComponent } from './create-edit-dialog/create-edit-dialog.component';
 import { TaskDetailsComponent } from './task-details/task-details.component';
 import { ConfirmationModalComponent } from './confirmation-modal/confirmation-modal.component';
+import { DialogActionButtonsComponent } from 'src/app/shared/components/dialog-action-buttons/dialog-action-buttons.component';
 
 @NgModule({
   declarations: [
@@ -21,6 +22,7 @@ import { ConfirmationModalComponent } from './confirmation-modal/confirmation-mo
     CreateEditDialogComponent,
     TaskDetailsComponent,
     ConfirmationModalComponent,
+    DialogActionButtonsComponent,
   ],
   imports: [
     CommonModule,
@@ -35,5 +37,6 @@ import { ConfirmationModalComponent } from './confirmation-modal/confirmation-mo
     MatChipsModule,
     MatMenuModule,
   ],
+  exports: [DialogActionButtonsComponent],
 })
 export class TaskModule {}

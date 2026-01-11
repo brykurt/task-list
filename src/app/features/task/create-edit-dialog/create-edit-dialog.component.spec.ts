@@ -13,6 +13,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CreateEditDialogComponent } from './create-edit-dialog.component';
 import { Status } from 'src/app/shared/models/share.model';
+import { DialogActionButtonsComponent } from 'src/app/shared/components/dialog-action-buttons/dialog-action-buttons.component';
 
 describe('CreateEditDialogComponent', () => {
   let component: CreateEditDialogComponent;
@@ -20,7 +21,7 @@ describe('CreateEditDialogComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [CreateEditDialogComponent],
+      declarations: [CreateEditDialogComponent, DialogActionButtonsComponent],
       imports: [
         ReactiveFormsModule,
         MatFormFieldModule,
