@@ -11,7 +11,7 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { TaskPageComponent } from './task-page.component';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { DialogTitle, Status } from 'src/app/shared/models/share.model';
 import { ITask } from 'src/app/shared/models/details.model';
 import { TASKS } from 'src/app/shared/constants/mock';
@@ -569,5 +569,133 @@ describe('TaskPageComponent', () => {
       .find((t) => t.taskTitle === 'No Flag Task');
     expect(taskService.getTasks().length).toBe(initialLength + 1);
     expect(added?.isDeleted).toBeFalse();
+  });
+
+  it('should handle error when opening task details dialog throws', () => {
+    const consoleErrorSpy = spyOn(console, 'error');
+    dialogSpy.open.and.throwError('Dialog open error');
+
+    const task: ITask = {
+      taskTitle: 'Test Task',
+      description: 'Test',
+      status: Status.PENDING,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: false,
+    };
+
+    component.openTaskDetails(task);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error opening task details:',
+      jasmine.any(Error)
+    );
+  });
+
+  it('should handle error in task details dialog afterClosed subscription', () => {
+    const consoleErrorSpy = spyOn(console, 'error');
+    const dialogRefSpyObj = jasmine.createSpyObj('MatDialogRef', [
+      'afterClosed',
+    ]);
+
+    dialogRefSpyObj.afterClosed.and.returnValue(
+      throwError(() => new Error('Dialog subscription error'))
+    );
+    dialogSpy.open.and.returnValue(dialogRefSpyObj);
+
+    const task: ITask = {
+      taskTitle: 'Test Task',
+      description: 'Test',
+      status: Status.PENDING,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: false,
+    };
+
+    component.openTaskDetails(task);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error updating task:',
+      jasmine.any(Error)
+    );
+  });
+
+  it('should handle error when adding task (dialog afterClosed throws)', () => {
+    const consoleErrorSpy = spyOn(console, 'error');
+    const dialogRefSpyObj = jasmine.createSpyObj('MatDialogRef', [
+      'afterClosed',
+    ]);
+
+    dialogRefSpyObj.afterClosed.and.returnValue(
+      throwError(() => new Error('Add task error'))
+    );
+    dialogSpy.open.and.returnValue(dialogRefSpyObj);
+
+    component.addTask();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error adding task:',
+      jasmine.any(Error)
+    );
+  });
+
+  it('should generate unique trackBy value using taskTitle and createdDate', () => {
+    const date = new Date('2024-03-10T12:00:00');
+    const task: ITask = {
+      taskTitle: 'Test Task',
+      description: 'Test',
+      status: Status.PENDING,
+      createdDate: date,
+      creating: false,
+      isDeleted: false,
+    };
+
+    const result = component.trackByTaskTitle(0, task);
+    expect(result).toBe('Test Task' + date.getTime());
+  });
+
+  it('should handle trackBy with null createdDate', () => {
+    const task: ITask = {
+      taskTitle: 'Test Task',
+      description: 'Test',
+      status: Status.PENDING,
+      createdDate: undefined,
+      creating: false,
+      isDeleted: false,
+    };
+
+    const result = component.trackByTaskTitle(0, task);
+    expect(result).toBe('Test Task' + undefined);
+  });
+
+  it('should have backward compatible task setter that does nothing', () => {
+    const newTasks: ITask[] = [
+      {
+        taskTitle: 'New Task',
+        description: 'Desc',
+        status: Status.PENDING,
+        createdDate: new Date(),
+        creating: false,
+        isDeleted: false,
+      },
+    ];
+
+    const initialTasks = component.tasks;
+    component.tasks = newTasks;
+    expect(component.tasks).toEqual(initialTasks);
+  });
+
+  it('should have backward compatible allTasks setter that does nothing', () => {
+    const newTasks: ITask[] = [
+      {
+        taskTitle: 'New Task',
+        description: 'Desc',
+        status: Status.PENDING,
+        createdDate: new Date(),
+        creating: false,
+        isDeleted: false,
+      },
+    ];
+
+    const initialAllTasks = component.allTasks;
+    component.allTasks = newTasks;
+    expect(component.allTasks).toEqual(initialAllTasks);
   });
 });

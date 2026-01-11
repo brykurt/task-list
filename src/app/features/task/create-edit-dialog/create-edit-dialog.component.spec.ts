@@ -127,4 +127,23 @@ describe('CreateEditDialogComponent', () => {
     expect(markAllAsTouchedSpy).toHaveBeenCalled();
     expect(component.dialogRef.close).not.toHaveBeenCalled();
   });
+
+  it('should handle error when onSave fails', () => {
+    const consoleErrorSpy = spyOn(console, 'error');
+    const dialogRefMock = jasmine.createSpyObj('MatDialogRef', ['close']);
+    dialogRefMock.close.and.throwError('Dialog close error');
+    component.dialogRef = dialogRefMock;
+
+    component.form.patchValue({
+      taskTitle: 'Test Task',
+      description: 'Test Description',
+      status: Status.IN_PROGRESS,
+    });
+
+    component.onSave();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error saving task:',
+      jasmine.any(Error)
+    );
+  });
 });
