@@ -5,8 +5,8 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 import { CreateEditDialogComponent } from '../create-edit-dialog/create-edit-dialog.component';
-import { DialogTitle, Status } from '../models/share.model';
-import { ITask } from '../models/details.model';
+import { DialogTitle, Status } from 'src/app/shared/models/share.model';
+import { ITask } from 'src/app/shared/models/details.model';
 import { ConfirmationModalComponent } from '../confirmation-modal/confirmation-modal.component';
 
 @Component({

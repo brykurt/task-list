@@ -12,9 +12,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { TaskPageComponent } from './task-page.component';
 import { of } from 'rxjs';
-import { DialogTitle, Status } from '../models/share.model';
-import { ITask } from '../models/details.model';
-import { TASKS } from '../constants/mock';
+import { DialogTitle, Status } from 'src/app/shared/models/share.model';
+import { ITask } from 'src/app/shared/models/details.model';
+import { TASKS } from 'src/app/shared/constants/mock';
 import { CreateEditDialogComponent } from '../create-edit-dialog/create-edit-dialog.component';
 
 describe('TaskPageComponent', () => {
@@ -118,6 +118,7 @@ describe('TaskPageComponent', () => {
       isDeleted: false,
     } as ITask;
 
+    component.allTasks = [task1, task2];
     component.tasks = [task1, task2];
 
     const dialogRefSpyObj = jasmine.createSpyObj({
@@ -179,6 +180,74 @@ describe('TaskPageComponent', () => {
     expect(updated?.isDeleted).toBeTrue();
     expect(component.paginatedTasks.length).toBe(1);
     expect(component.paginatedTasks[0].taskTitle).toBe('Task B');
+  });
+
+  it('should reapply search filter when details dialog returns a result and searchTerm is set', () => {
+    const task1: ITask = {
+      taskTitle: 'Alpha Task',
+      description: 'Desc A',
+      status: Status.PENDING,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: false,
+    } as ITask;
+    const task2: ITask = {
+      taskTitle: 'Beta Task',
+      description: 'Desc B',
+      status: Status.DONE,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: false,
+    } as ITask;
+
+    component.allTasks = [task1, task2];
+    component.tasks = [task1, task2];
+    component.searchTerm = 'beta';
+
+    const dialogRefSpyObj = jasmine.createSpyObj({
+      afterClosed: of({
+        taskTitle: 'Alpha Task Updated',
+        description: 'Desc A2',
+        status: Status.IN_PROGRESS,
+      } as Partial<ITask> as ITask),
+    });
+
+    dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
+
+    component.openTaskDetails(task1);
+
+    expect(component.tasks.length).toBe(1);
+    expect(component.tasks[0].taskTitle).toBe('Beta Task');
+  });
+
+  it('should default isDeleted to false when details dialog omits it and task had no flag', () => {
+    const task: ITask = {
+      taskTitle: 'Flagless Task',
+      description: 'No flag',
+      status: Status.PENDING,
+      createdDate: new Date(),
+      creating: false,
+    } as ITask;
+
+    component.allTasks = [task];
+    component.tasks = [task];
+
+    const dialogRefSpyObj = jasmine.createSpyObj({
+      afterClosed: of({
+        taskTitle: 'Flagless Task Updated',
+        description: 'Still no flag',
+        status: Status.DONE,
+        // omit isDeleted to hit nullish default
+      } as Partial<ITask> as ITask),
+    });
+
+    dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
+
+    component.openTaskDetails(task);
+
+    const updated = component.allTasks[0];
+    expect(updated.isDeleted).toBeFalse();
+    expect(updated.taskTitle).toBe('Flagless Task Updated');
   });
 
   describe('goToPage', () => {
@@ -467,7 +536,9 @@ describe('TaskPageComponent', () => {
 
     component.addTask();
 
-    const added = component.allTasks.find((t) => t.taskTitle === 'No Flag Task');
+    const added = component.allTasks.find(
+      (t) => t.taskTitle === 'No Flag Task'
+    );
     expect(component.allTasks.length).toBe(initialLength + 1);
     expect(added?.isDeleted).toBeFalse();
   });

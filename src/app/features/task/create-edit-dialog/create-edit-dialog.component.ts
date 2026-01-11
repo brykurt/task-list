@@ -1,6 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { IDialogData, Status } from '../models/share.model';
+import { IDialogData, Status } from 'src/app/shared/models/share.model';
 import {
   Form,
   FormBuilder,

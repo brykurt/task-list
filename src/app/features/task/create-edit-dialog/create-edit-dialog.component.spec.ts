@@ -12,7 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CreateEditDialogComponent } from './create-edit-dialog.component';
-import { Status } from '../models/share.model';
+import { Status } from 'src/app/shared/models/share.model';
 
 describe('CreateEditDialogComponent', () => {
   let component: CreateEditDialogComponent;
