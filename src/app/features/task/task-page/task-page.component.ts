@@ -43,15 +43,9 @@ export class TaskPageComponent {
   get searchTerm(): string {
     return this.taskService.searchTerm();
   }
-  set searchTerm(value: string) {
-    this.taskService.setSearchTerm(value);
-  }
 
   get selectedSort(): SortOption {
     return this.taskService.selectedSort();
-  }
-  set selectedSort(value: SortOption) {
-    this.taskService.setSort(value);
   }
 
   ngOnInit(): void {
