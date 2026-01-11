@@ -7,31 +7,54 @@
     role="form"
   >
     <mat-dialog-content>
-      <h3>Task Title</h3>
+      <h3 id="task-title-label">Task Title</h3>
       <mat-form-field appearance="outline" class="full-width">
-        <input matInput placeholder="Enter title" formControlName="taskTitle" />
+        <input
+          matInput
+          placeholder="Enter title"
+          formControlName="taskTitle"
+          aria-labelledby="task-title-label"
+          [attr.aria-invalid]="
+            form.get('taskTitle')?.invalid && form.get('taskTitle')?.touched
+          "
+          [attr.aria-describedby]="
+            form.get('taskTitle')?.hasError('required') &&
+            form.get('taskTitle')?.touched
+              ? 'task-title-error'
+              : null
+          "
+        />
         <mat-error
+          id="task-title-error"
           *ngIf="
             form.get('taskTitle')?.hasError('required') &&
             form.get('taskTitle')?.touched
           "
+          role="alert"
         >
           Title is required
         </mat-error>
       </mat-form-field>
 
-      <h3>Description</h3>
+      <h3 id="description-label">Description</h3>
       <mat-form-field appearance="outline" class="full-width">
         <textarea
           matInput
           placeholder="Enter Description"
           formControlName="description"
+          aria-labelledby="description-label"
         ></textarea>
       </mat-form-field>
 
-      <h3>Status</h3>
+      <h3 id="status-label">Status</h3>
       <mat-form-field appearance="outline" class="full-width">
-        <mat-select formControlName="status">
+        <mat-select
+          formControlName="status"
+          aria-labelledby="status-label"
+          [attr.aria-invalid]="
+            form.get('status')?.invalid && form.get('status')?.touched
+          "
+        >
           <mat-option
             *ngFor="let status of statusOptions"
             [value]="status.displayValue"
@@ -48,6 +71,8 @@
       primaryColor="primary"
       primaryType="submit"
       [primaryDisabled]="form.invalid"
+      secondaryAriaLabel="Cancel without saving changes"
+      primaryAriaLabel="Save task and close dialog"
       (secondaryClick)="onClose()"
     ></app-dialog-action-buttons>
   </form>

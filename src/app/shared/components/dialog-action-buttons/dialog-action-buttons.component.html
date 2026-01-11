@@ -3,6 +3,7 @@
     mat-button
     [type]="secondaryType"
     [disabled]="secondaryDisabled"
+    [attr.aria-label]="secondaryAriaLabel || secondaryLabel"
     (click)="secondaryClick.emit()"
   >
     {{ secondaryLabel }}
@@ -12,6 +13,7 @@
     [color]="primaryColor"
     [type]="primaryType"
     [disabled]="primaryDisabled"
+    [attr.aria-label]="primaryAriaLabel || primaryLabel"
     (click)="primaryClick.emit()"
   >
     {{ primaryLabel }}

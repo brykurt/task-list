@@ -92,44 +92,53 @@ export class TaskPageComponent {
   constructor(public dialog: MatDialog) {}
 
   openTaskDetails(task: ITask): void {
-    const dialogRef = this.dialog.open(TaskDetailsComponent, {
-      data: task,
-      panelClass: 'task-details-dialog',
-      disableClose: true,
-    });
+    try {
+      const dialogRef = this.dialog.open(TaskDetailsComponent, {
+        data: task,
+        panelClass: 'task-details-dialog',
+        disableClose: true,
+      });
 
-    dialogRef.afterClosed().subscribe((result: ITask) => {
-      if (result) {
-        const applyUpdate = (list: ITask[]) =>
-          list.map((t) =>
-            t === task
-              ? {
-                  ...t,
-                  taskTitle: result.taskTitle,
-                  description: result.description,
-                  status: result.status,
-                  isDeleted: result.isDeleted ?? t.isDeleted ?? false,
-                }
-              : t
-          );
+      dialogRef.afterClosed().subscribe({
+        next: (result: ITask) => {
+          if (result) {
+            const applyUpdate = (list: ITask[]) =>
+              list.map((t) =>
+                t === task
+                  ? {
+                      ...t,
+                      taskTitle: result.taskTitle,
+                      description: result.description,
+                      status: result.status,
+                      isDeleted: result.isDeleted ?? t.isDeleted ?? false,
+                    }
+                  : t
+              );
 
-        const updatedAll = applyUpdate(this.allTasks);
-        this.allTasks = updatedAll;
+            const updatedAll = applyUpdate(this.allTasks);
+            this.allTasks = updatedAll;
 
-        if (this.searchTerm) {
-          const term = this.searchTerm;
-          this.tasks = updatedAll.filter(
-            (t) =>
-              t.taskTitle.toLowerCase().includes(term) ||
-              t.status.toLowerCase().includes(term)
-          );
-        } else {
-          this.tasks = updatedAll;
-        }
+            if (this.searchTerm) {
+              const term = this.searchTerm;
+              this.tasks = updatedAll.filter(
+                (t) =>
+                  t.taskTitle.toLowerCase().includes(term) ||
+                  t.status.toLowerCase().includes(term)
+              );
+            } else {
+              this.tasks = updatedAll;
+            }
 
-        this.setSort(this.selectedSort);
-      }
-    });
+            this.setSort(this.selectedSort);
+          }
+        },
+        error: (error) => {
+          console.error('Error updating task:', error);
+        },
+      });
+    } catch (error) {
+      console.error('Error opening task details:', error);
+    }
   }
 
   goToPage(page: number): void {
@@ -200,25 +209,30 @@ export class TaskPageComponent {
       panelClass: 'dialog-content',
       disableClose: true,
     });
-    dialogRef.afterClosed().subscribe((result: ITask) => {
-      if (result) {
-        const newTask: ITask = {
-          ...result,
-          isDeleted: result.isDeleted ?? false,
-        };
-        this.allTasks = [...this.allTasks, newTask];
+    dialogRef.afterClosed().subscribe({
+      next: (result: ITask) => {
+        if (result) {
+          const newTask: ITask = {
+            ...result,
+            isDeleted: result.isDeleted ?? false,
+          };
+          this.allTasks = [...this.allTasks, newTask];
 
-        if (this.searchTerm) {
-          const term = this.searchTerm;
-          this.tasks = this.allTasks.filter(
-            (task) =>
-              task.taskTitle.toLowerCase().includes(term) ||
-              task.status.toLowerCase().includes(term)
-          );
-        } else {
-          this.tasks = [...this.allTasks];
+          if (this.searchTerm) {
+            const term = this.searchTerm;
+            this.tasks = this.allTasks.filter(
+              (task) =>
+                task.taskTitle.toLowerCase().includes(term) ||
+                task.status.toLowerCase().includes(term)
+            );
+          } else {
+            this.tasks = [...this.allTasks];
+          }
         }
-      }
+      },
+      error: (error) => {
+        console.error('Error adding task:', error);
+      },
     });
   }
 }
