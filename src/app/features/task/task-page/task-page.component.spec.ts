@@ -664,4 +664,74 @@ describe('TaskPageComponent', () => {
     const result = component.trackByTaskTitle(0, task);
     expect(result).toBe('Test Task' + undefined);
   });
+
+  it('should return visible tasks from get tasks() getter', () => {
+    const testTask1: ITask = {
+      taskTitle: 'Task 1',
+      description: 'Description 1',
+      status: Status.PENDING,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: false,
+    };
+    const testTask2: ITask = {
+      taskTitle: 'Task 2',
+      description: 'Description 2',
+      status: Status.DONE,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: false,
+    };
+    const deletedTask: ITask = {
+      taskTitle: 'Deleted Task',
+      description: 'Should not be visible',
+      status: Status.PENDING,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: true,
+    };
+
+    taskService['allTasksSig'].set([testTask1, testTask2, deletedTask]);
+
+    const tasks = component.tasks;
+    expect(tasks.length).toBe(2);
+    expect(tasks).toContain(testTask1);
+    expect(tasks).toContain(testTask2);
+    expect(tasks).not.toContain(deletedTask);
+  });
+
+  it('should return all tasks from get allTasks() getter', () => {
+    const testTask1: ITask = {
+      taskTitle: 'Task 1',
+      description: 'Description 1',
+      status: Status.PENDING,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: false,
+    };
+    const testTask2: ITask = {
+      taskTitle: 'Task 2',
+      description: 'Description 2',
+      status: Status.DONE,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: false,
+    };
+    const deletedTask: ITask = {
+      taskTitle: 'Deleted Task',
+      description: 'Should be included in allTasks',
+      status: Status.PENDING,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: true,
+    };
+
+    taskService['allTasksSig'].set([testTask1, testTask2, deletedTask]);
+
+    const allTasks = component.allTasks;
+    expect(allTasks.length).toBe(3);
+    expect(allTasks).toContain(testTask1);
+    expect(allTasks).toContain(testTask2);
+    expect(allTasks).toContain(deletedTask);
+  });
 });
