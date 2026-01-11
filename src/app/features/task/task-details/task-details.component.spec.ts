@@ -10,7 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { DialogTitle, Status } from 'src/app/shared/models/share.model';
 
@@ -137,5 +137,63 @@ describe('TaskDetailsComponent', () => {
     expect(dialogSpy.open).toHaveBeenCalled();
     // Task should remain unchanged
     expect(component.data).toEqual(originalTask);
+  });
+
+  it('should handle error when openEditDialog throws', () => {
+    const consoleErrorSpy = spyOn(console, 'error');
+    dialogSpy.open.and.throwError('Dialog open error');
+
+    component.openEditDialog();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error opening edit dialog:',
+      jasmine.any(Error)
+    );
+  });
+
+  it('should handle error in openEditDialog afterClosed subscription', () => {
+    const consoleErrorSpy = spyOn(console, 'error');
+    const dialogRefSpyObj = jasmine.createSpyObj('MatDialogRef', [
+      'afterClosed',
+    ]);
+
+    dialogRefSpyObj.afterClosed.and.returnValue(
+      throwError(() => new Error('Edit dialog subscription error'))
+    );
+    dialogSpy.open.and.returnValue(dialogRefSpyObj);
+
+    component.openEditDialog();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error editing task:',
+      jasmine.any(Error)
+    );
+  });
+
+  it('should handle error when openDeleteDialog throws', () => {
+    const consoleErrorSpy = spyOn(console, 'error');
+    dialogSpy.open.and.throwError('Delete dialog error');
+
+    component.openDeleteDialog();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error opening delete dialog:',
+      jasmine.any(Error)
+    );
+  });
+
+  it('should handle error in openDeleteDialog afterClosed subscription', () => {
+    const consoleErrorSpy = spyOn(console, 'error');
+    const dialogRefSpyObj = jasmine.createSpyObj('MatDialogRef', [
+      'afterClosed',
+    ]);
+
+    dialogRefSpyObj.afterClosed.and.returnValue(
+      throwError(() => new Error('Delete dialog subscription error'))
+    );
+    dialogSpy.open.and.returnValue(dialogRefSpyObj);
+
+    component.openDeleteDialog();
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error deleting task:',
+      jasmine.any(Error)
+    );
   });
 });
