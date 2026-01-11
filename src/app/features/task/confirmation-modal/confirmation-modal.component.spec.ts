@@ -4,6 +4,7 @@ import { ConfirmationModalComponent } from './confirmation-modal.component';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { DialogActionButtonsComponent } from 'src/app/shared/components/dialog-action-buttons/dialog-action-buttons.component';
 
 describe('ConfirmationModalComponent', () => {
   let component: ConfirmationModalComponent;
@@ -11,7 +12,7 @@ describe('ConfirmationModalComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ConfirmationModalComponent],
+      declarations: [ConfirmationModalComponent, DialogActionButtonsComponent],
       imports: [MatDialogModule, MatButtonModule, BrowserAnimationsModule],
       providers: [
         {

@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { of } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { DialogTitle, Status } from '../models/share.model';
+import { DialogTitle, Status } from 'src/app/shared/models/share.model';
 
 describe('TaskDetailsComponent', () => {
   let component: TaskDetailsComponent;

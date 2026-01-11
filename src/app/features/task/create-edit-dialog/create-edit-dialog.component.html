@@ -42,19 +42,13 @@
       </mat-form-field>
     </mat-dialog-content>
 
-    <mat-dialog-actions align="end">
-      <button class="cancel-btn" type="button" mat-button (click)="onClose()">
-        Cancel
-      </button>
-      <button
-        class="save-btn"
-        type="submit"
-        mat-raised-button
-        color="primary"
-        [disabled]="form.invalid"
-      >
-        Save
-      </button>
-    </mat-dialog-actions>
+    <app-dialog-action-buttons
+      secondaryLabel="Cancel"
+      primaryLabel="Save"
+      primaryColor="primary"
+      primaryType="submit"
+      [primaryDisabled]="form.invalid"
+      (secondaryClick)="onClose()"
+    ></app-dialog-action-buttons>
   </form>
 </div>

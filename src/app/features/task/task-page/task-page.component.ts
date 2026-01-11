@@ -1,11 +1,10 @@
 import { Component, computed, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { TASKS } from 'src/app/constants/mock';
-import { ITask } from 'src/app/models/details.model';
-import { DialogTitle, Status } from 'src/app/models/share.model';
+import { TASKS } from 'src/app/shared/constants/mock';
+import { ITask } from 'src/app/shared/models/details.model';
+import { DialogTitle, Status } from 'src/app/shared/models/share.model';
 import { TaskDetailsComponent } from '../task-details/task-details.component';
 import { CreateEditDialogComponent } from '../create-edit-dialog/create-edit-dialog.component';
-import { Dialog } from '@angular/cdk/dialog';
 
 @Component({
   selector: 'app-task-page',
