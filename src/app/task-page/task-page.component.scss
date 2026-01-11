@@ -15,14 +15,14 @@
 
 .filters-section {
   display: flex;
-  flex-direction: column; // stack search box and action row vertically
+  flex-direction: column;
   gap: 16px;
   margin-bottom: 24px;
 }
 
 .action-row {
   display: flex;
-  justify-content: space-between; // left button, right sort
+  justify-content: space-between;
   align-items: center;
 }
 
@@ -50,10 +50,6 @@
       color: #9ca3af;
     }
   }
-}
-
-.button-container {
-  // no special styles needed, just a wrapper
 }
 
 .sort-section {

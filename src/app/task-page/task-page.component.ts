@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TASKS } from 'src/app/constants/mock';
 import { ITask } from 'src/app/models/details.model';
@@ -15,29 +15,79 @@ import { Dialog } from '@angular/cdk/dialog';
 export class TaskPageComponent {
   statuses = Status;
   title = 'task-list-app';
-  tasks = TASKS;
-  searchTerm: string = '';
-  allTasks: ITask[] = TASKS;
-  selectedSort: 'Title' | 'Date Newest' | 'Date Oldest' | 'Status' = 'Title';
-  currentPage = 1;
-  itemsPerPage = 3;
+
+  private tasksSig = signal<ITask[]>(TASKS);
+  private allTasksSig = signal<ITask[]>(TASKS);
+  private searchTermSig = signal<string>('');
+  private selectedSortSig = signal<
+    'Title' | 'Date Newest' | 'Date Oldest' | 'Status'
+  >('Title');
+  private currentPageSig = signal<number>(1);
+  private itemsPerPageSig = signal<number>(3);
+
+  get tasks(): ITask[] {
+    return this.tasksSig();
+  }
+  set tasks(value: ITask[]) {
+    this.tasksSig.set(value);
+  }
+
+  get allTasks(): ITask[] {
+    return this.allTasksSig();
+  }
+  set allTasks(value: ITask[]) {
+    this.allTasksSig.set(value);
+  }
+
+  get searchTerm(): string {
+    return this.searchTermSig();
+  }
+  set searchTerm(value: string) {
+    this.searchTermSig.set(value);
+  }
+
+  get selectedSort(): 'Title' | 'Date Newest' | 'Date Oldest' | 'Status' {
+    return this.selectedSortSig();
+  }
+  set selectedSort(value: 'Title' | 'Date Newest' | 'Date Oldest' | 'Status') {
+    this.selectedSortSig.set(value);
+  }
+
+  get currentPage(): number {
+    return this.currentPageSig();
+  }
+  set currentPage(value: number) {
+    this.currentPageSig.set(value);
+  }
+
+  get itemsPerPage(): number {
+    return this.itemsPerPageSig();
+  }
+  set itemsPerPage(value: number) {
+    this.itemsPerPageSig.set(value);
+  }
 
   ngOnInit(): void {
     this.setSort(this.selectedSort);
   }
+  private totalPagesSig = computed(() =>
+    Math.ceil(
+      this.tasksSig().filter((task) => !task.isDeleted).length /
+        this.itemsPerPageSig()
+    )
+  );
   get totalPages(): number {
-    return Math.ceil(
-      this.tasks.filter((task) => !task.isDeleted).length / this.itemsPerPage
-    );
+    return this.totalPagesSig();
   }
 
-  get paginatedTasks(): ITask[] {
-    const visibleTasks = this.tasks.filter((task) => !task.isDeleted);
-
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-
+  private paginatedTasksSig = computed(() => {
+    const visibleTasks = this.tasksSig().filter((task) => !task.isDeleted);
+    const startIndex = (this.currentPageSig() - 1) * this.itemsPerPageSig();
+    const endIndex = startIndex + this.itemsPerPageSig();
     return visibleTasks.slice(startIndex, endIndex);
+  });
+  get paginatedTasks(): ITask[] {
+    return this.paginatedTasksSig();
   }
 
   constructor(public dialog: MatDialog) {}
@@ -51,12 +101,16 @@ export class TaskPageComponent {
 
     dialogRef.afterClosed().subscribe((result: ITask) => {
       if (result) {
-        const selectedTask = this.tasks?.find((t) => t === task);
-        if (selectedTask) {
-          selectedTask.taskTitle = result.taskTitle;
-          selectedTask.description = result.description;
-          selectedTask.status = result.status;
-        }
+        this.tasks = this.tasks.map((t) =>
+          t === task
+            ? {
+                ...t,
+                taskTitle: result.taskTitle,
+                description: result.description,
+                status: result.status,
+              }
+            : t
+        );
       }
     });
   }
@@ -93,7 +147,7 @@ export class TaskPageComponent {
 
     const comparator = comparators[sortBy];
     if (comparator) {
-      this.tasks.sort(comparator);
+      this.tasks = [...this.tasks].sort(comparator);
     }
 
     this.currentPage = 1;
@@ -106,10 +160,11 @@ export class TaskPageComponent {
     if (!this.searchTerm) {
       this.tasks = [...this.allTasks];
     } else {
+      const term = this.searchTerm;
       this.tasks = this.allTasks.filter(
         (task) =>
-          task.taskTitle.toLowerCase().includes(this.searchTerm) ||
-          task.status.toLowerCase().includes(this.searchTerm)
+          task.taskTitle.toLowerCase().includes(term) ||
+          task.status.toLowerCase().includes(term)
       );
     }
 
@@ -130,7 +185,22 @@ export class TaskPageComponent {
     });
     dialogRef.afterClosed().subscribe((result: ITask) => {
       if (result) {
-        this.allTasks.push(result);
+        const newTask: ITask = {
+          ...result,
+          isDeleted: result.isDeleted ?? false,
+        };
+        this.allTasks = [...this.allTasks, newTask];
+
+        if (this.searchTerm) {
+          const term = this.searchTerm;
+          this.tasks = this.allTasks.filter(
+            (task) =>
+              task.taskTitle.toLowerCase().includes(term) ||
+              task.status.toLowerCase().includes(term)
+          );
+        } else {
+          this.tasks = [...this.allTasks];
+        }
       }
     });
   }

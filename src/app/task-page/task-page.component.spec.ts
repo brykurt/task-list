@@ -74,10 +74,71 @@ describe('TaskPageComponent', () => {
     component.openTaskDetails(task);
   });
 
+  it('should not modify task when details dialog returns no result', () => {
+    const dialogRefSpyObj = jasmine.createSpyObj({
+      afterClosed: of(undefined),
+    });
+    const task: ITask = {
+      taskTitle: 'Original Task',
+      description: 'Original Description',
+      status: Status.PENDING,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: false,
+    } as ITask;
+    component.tasks = [task];
+    const before = JSON.stringify(component.tasks);
+    dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
+    component.openTaskDetails(task);
+    const after = JSON.stringify(component.tasks);
+    expect(after).toBe(before);
+  });
+
   it('should call ngOnInit', () => {
     const spy = spyOn(component, 'ngOnInit');
     component.ngOnInit();
     expect(spy).toHaveBeenCalled();
+  });
+
+  it('should update only selected task and leave others unchanged', () => {
+    const task1: ITask = {
+      taskTitle: 'Task A',
+      description: 'Desc A',
+      status: Status.PENDING,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: false,
+    } as ITask;
+    const task2: ITask = {
+      taskTitle: 'Task B',
+      description: 'Desc B',
+      status: Status.IN_PROGRESS,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: false,
+    } as ITask;
+
+    component.tasks = [task1, task2];
+
+    const dialogRefSpyObj = jasmine.createSpyObj({
+      afterClosed: of({
+        taskTitle: 'Task A Updated',
+        description: 'Desc A2',
+        status: Status.DONE,
+      } as Partial<ITask> as ITask),
+    });
+
+    dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
+
+    component.openTaskDetails(task1);
+
+    expect(component.tasks.length).toBe(2);
+    expect(component.tasks[0].taskTitle).toBe('Task A Updated');
+    expect(component.tasks[0].description).toBe('Desc A2');
+    expect(component.tasks[0].status).toBe(Status.DONE);
+    expect(component.tasks[1].taskTitle).toBe('Task B');
+    expect(component.tasks[1].description).toBe('Desc B');
+    expect(component.tasks[1].status).toBe(Status.IN_PROGRESS);
   });
 
   describe('goToPage', () => {
@@ -159,21 +220,88 @@ describe('TaskPageComponent', () => {
     it('should sort tasks by Title alphabetically', () => {
       component.setSort('Title');
       expect(component.currentPage).toBe(1);
+      const titles = component.tasks.map((t) => t.taskTitle);
+      expect(titles.slice(0, 5)).toEqual([
+        'Add dark mode',
+        'Add unit tests',
+        'Design dashboard UI',
+        'Fix pagination issue',
+        'Implement task filters',
+      ]);
     });
 
     it('should sort tasks by Date Newest', () => {
       component.setSort('Date Newest');
       expect(component.currentPage).toBe(1);
+      const titles = component.tasks.map((t) => t.taskTitle);
+      expect(titles.slice(0, 5)).toEqual([
+        'Refactor auth service',
+        'Design dashboard UI',
+        'Fix pagination issue',
+        'Add unit tests',
+        'Optimize database queries',
+      ]);
     });
 
     it('should sort tasks by Date Oldest', () => {
       component.setSort('Date Oldest');
       expect(component.currentPage).toBe(1);
+      const titles = component.tasks.map((t) => t.taskTitle);
+      expect(titles.slice(0, 5)).toEqual([
+        'Add dark mode',
+        'Update dependencies',
+        'Improve error handling',
+        'Implement task filters',
+        'Remove deprecated endpoints',
+      ]);
     });
 
     it('should sort tasks by Status alphabetically', () => {
       component.setSort('Status');
       expect(component.currentPage).toBe(1);
+      const statuses = component.tasks.map((t) => t.status);
+      for (let i = 1; i < statuses.length; i++) {
+        expect(statuses[i - 1].localeCompare(statuses[i])).toBeLessThanOrEqual(
+          0
+        );
+      }
+    });
+
+    it('should ignore unknown sort key and only reset page', () => {
+      component.tasks = TASKS;
+      component.currentPage = 3;
+      const beforeRef = component.tasks;
+      (component as any).setSort('Unknown');
+      expect(component.tasks).toBe(beforeRef);
+      expect(component.currentPage).toBe(1);
+    });
+  });
+
+  describe('itemsPerPage getter/setter', () => {
+    beforeEach(() => {
+      component.tasks = TASKS;
+      component.currentPage = 1;
+    });
+
+    it('should expose itemsPerPage via getter and setter', () => {
+      const initial = component.itemsPerPage;
+      expect(initial).toBe(3);
+      component.itemsPerPage = 2;
+      expect(component.itemsPerPage).toBe(2);
+    });
+
+    it('should recompute totalPages and paginatedTasks when itemsPerPage changes', () => {
+      expect(component.totalPages).toBe(3);
+
+      component.itemsPerPage = 2;
+      fixture.detectChanges();
+      expect(component.totalPages).toBe(5);
+      expect(component.paginatedTasks.length).toBe(2);
+
+      component.itemsPerPage = 4;
+      fixture.detectChanges();
+      expect(component.totalPages).toBe(3);
+      expect(component.paginatedTasks.length).toBe(4);
     });
   });
 
@@ -237,5 +365,70 @@ describe('TaskPageComponent', () => {
 
     expect(component.allTasks.length).toBe(initialLength + 1);
     expect(component.allTasks).toContain(newTask);
+    expect(component.tasks.length).toBe(initialLength + 1);
+    expect(component.tasks.some((t) => t.taskTitle === 'New Task')).toBeTrue();
+    expect(component.currentPage).toBe(1);
+  });
+
+  it('should not add task when create dialog returns no result', () => {
+    const dialogRefSpyObj = jasmine.createSpyObj({
+      afterClosed: of(undefined),
+    });
+    dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
+    const initialLength = component.allTasks.length;
+    component.addTask();
+    expect(component.allTasks.length).toBe(initialLength);
+  });
+
+  it('should add task and honor active search filter', () => {
+    component.allTasks = TASKS;
+    const searchEvent = { target: { value: 'unique' } } as unknown as Event;
+    component.onSearchTermChange(searchEvent);
+    expect(component.tasks.length).toBe(0);
+
+    const matchingTask: ITask = {
+      taskTitle: 'Unique Feature',
+      description: 'Something unique',
+      status: Status.PENDING,
+      isDeleted: false,
+      creating: true,
+      createdDate: new Date(),
+    };
+
+    const dialogRefSpyObj = jasmine.createSpyObj({
+      afterClosed: of(matchingTask),
+    });
+    dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
+
+    component.addTask();
+
+    expect(
+      component.allTasks.some((t) => t.taskTitle === 'Unique Feature')
+    ).toBeTrue();
+    expect(component.tasks.length).toBe(1);
+    expect(component.tasks[0].taskTitle).toBe('Unique Feature');
+    expect(component.currentPage).toBe(1);
+  });
+
+  it('should default isDeleted to false when dialog omits it', () => {
+    const dialogRefSpyObj = jasmine.createSpyObj({
+      afterClosed: of({
+        taskTitle: 'No Flag Task',
+        description: 'Missing isDeleted',
+        status: Status.PENDING,
+        creating: true,
+        createdDate: new Date(),
+        // intentionally omit isDeleted to hit defaulting branch
+      } as Partial<ITask> as ITask),
+    });
+
+    dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
+    const initialLength = component.allTasks.length;
+
+    component.addTask();
+
+    const added = component.allTasks.find((t) => t.taskTitle === 'No Flag Task');
+    expect(component.allTasks.length).toBe(initialLength + 1);
+    expect(added?.isDeleted).toBeFalse();
   });
 });
