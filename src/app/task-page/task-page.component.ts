@@ -101,16 +101,34 @@ export class TaskPageComponent {
 
     dialogRef.afterClosed().subscribe((result: ITask) => {
       if (result) {
-        this.tasks = this.tasks.map((t) =>
-          t === task
-            ? {
-                ...t,
-                taskTitle: result.taskTitle,
-                description: result.description,
-                status: result.status,
-              }
-            : t
-        );
+        const applyUpdate = (list: ITask[]) =>
+          list.map((t) =>
+            t === task
+              ? {
+                  ...t,
+                  taskTitle: result.taskTitle,
+                  description: result.description,
+                  status: result.status,
+                  isDeleted: result.isDeleted ?? t.isDeleted ?? false,
+                }
+              : t
+          );
+
+        const updatedAll = applyUpdate(this.allTasks);
+        this.allTasks = updatedAll;
+
+        if (this.searchTerm) {
+          const term = this.searchTerm;
+          this.tasks = updatedAll.filter(
+            (t) =>
+              t.taskTitle.toLowerCase().includes(term) ||
+              t.status.toLowerCase().includes(term)
+          );
+        } else {
+          this.tasks = updatedAll;
+        }
+
+        this.setSort(this.selectedSort);
       }
     });
   }

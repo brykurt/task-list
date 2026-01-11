@@ -141,6 +141,46 @@ describe('TaskPageComponent', () => {
     expect(component.tasks[1].status).toBe(Status.IN_PROGRESS);
   });
 
+  it('should mark task as deleted when dialog returns isDeleted', () => {
+    const task1: ITask = {
+      taskTitle: 'Task A',
+      description: 'Desc A',
+      status: Status.PENDING,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: false,
+    } as ITask;
+    const task2: ITask = {
+      taskTitle: 'Task B',
+      description: 'Desc B',
+      status: Status.IN_PROGRESS,
+      createdDate: new Date(),
+      creating: false,
+      isDeleted: false,
+    } as ITask;
+
+    component.tasks = [task1, task2];
+    component.allTasks = [task1, task2];
+
+    const dialogRefSpyObj = jasmine.createSpyObj({
+      afterClosed: of({
+        taskTitle: 'Task A',
+        description: 'Desc A',
+        status: Status.PENDING,
+        isDeleted: true,
+      } as ITask),
+    });
+
+    dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
+
+    component.openTaskDetails(task1);
+
+    const updated = component.allTasks.find((t) => t.taskTitle === 'Task A');
+    expect(updated?.isDeleted).toBeTrue();
+    expect(component.paginatedTasks.length).toBe(1);
+    expect(component.paginatedTasks[0].taskTitle).toBe('Task B');
+  });
+
   describe('goToPage', () => {
     beforeEach(() => {
       component.tasks = TASKS;
