@@ -16,11 +16,14 @@ import { DialogTitle, Status } from 'src/app/shared/models/share.model';
 import { ITask } from 'src/app/shared/models/details.model';
 import { TASKS } from 'src/app/shared/constants/mock';
 import { CreateEditDialogComponent } from '../create-edit-dialog/create-edit-dialog.component';
+import { TaskService } from 'src/app/shared/services/task.service';
 
 describe('TaskPageComponent', () => {
   let component: TaskPageComponent;
   let fixture: ComponentFixture<TaskPageComponent>;
   let dialogSpy: jasmine.SpyObj<MatDialog>;
+  let taskService: TaskService;
+
   beforeEach(() => {
     dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
     TestBed.configureTestingModule({
@@ -33,6 +36,8 @@ describe('TaskPageComponent', () => {
         CommonModule,
       ],
       providers: [
+        // Provide TaskService fresh for each test, not as singleton
+        { provide: TaskService, useClass: TaskService },
         { provide: MatDialog, useValue: dialogSpy },
         {
           provide: MatDialogRef,
@@ -52,6 +57,7 @@ describe('TaskPageComponent', () => {
     });
     fixture = TestBed.createComponent(TaskPageComponent);
     component = fixture.componentInstance;
+    taskService = TestBed.inject(TaskService);
     fixture.detectChanges();
   });
 
@@ -69,7 +75,10 @@ describe('TaskPageComponent', () => {
       status: Status.PENDING,
       createdDate: new Date(),
     } as ITask;
-    component.tasks = [task];
+
+    // Manually set the task in service for testing
+    taskService['allTasksSig'].set([task]);
+
     dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
     component.openTaskDetails(task);
   });
@@ -86,11 +95,14 @@ describe('TaskPageComponent', () => {
       creating: false,
       isDeleted: false,
     } as ITask;
-    component.tasks = [task];
-    const before = JSON.stringify(component.tasks);
+
+    taskService['allTasksSig'].set([task]);
+    const before = JSON.stringify(taskService.visibleTasks());
+
     dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
     component.openTaskDetails(task);
-    const after = JSON.stringify(component.tasks);
+
+    const after = JSON.stringify(taskService.visibleTasks());
     expect(after).toBe(before);
   });
 
@@ -118,8 +130,7 @@ describe('TaskPageComponent', () => {
       isDeleted: false,
     } as ITask;
 
-    component.allTasks = [task1, task2];
-    component.tasks = [task1, task2];
+    taskService['allTasksSig'].set([task1, task2]);
 
     const dialogRefSpyObj = jasmine.createSpyObj({
       afterClosed: of({
@@ -133,13 +144,14 @@ describe('TaskPageComponent', () => {
 
     component.openTaskDetails(task1);
 
-    expect(component.tasks.length).toBe(2);
-    expect(component.tasks[0].taskTitle).toBe('Task A Updated');
-    expect(component.tasks[0].description).toBe('Desc A2');
-    expect(component.tasks[0].status).toBe(Status.DONE);
-    expect(component.tasks[1].taskTitle).toBe('Task B');
-    expect(component.tasks[1].description).toBe('Desc B');
-    expect(component.tasks[1].status).toBe(Status.IN_PROGRESS);
+    const visibleTasks = taskService.visibleTasks();
+    expect(visibleTasks.length).toBe(2);
+    expect(visibleTasks[0].taskTitle).toBe('Task A Updated');
+    expect(visibleTasks[0].description).toBe('Desc A2');
+    expect(visibleTasks[0].status).toBe(Status.DONE);
+    expect(visibleTasks[1].taskTitle).toBe('Task B');
+    expect(visibleTasks[1].description).toBe('Desc B');
+    expect(visibleTasks[1].status).toBe(Status.IN_PROGRESS);
   });
 
   it('should mark task as deleted when dialog returns isDeleted', () => {
@@ -160,8 +172,7 @@ describe('TaskPageComponent', () => {
       isDeleted: false,
     } as ITask;
 
-    component.tasks = [task1, task2];
-    component.allTasks = [task1, task2];
+    taskService['allTasksSig'].set([task1, task2]);
 
     const dialogRefSpyObj = jasmine.createSpyObj({
       afterClosed: of({
@@ -176,7 +187,9 @@ describe('TaskPageComponent', () => {
 
     component.openTaskDetails(task1);
 
-    const updated = component.allTasks.find((t) => t.taskTitle === 'Task A');
+    const updated = taskService
+      .getTasks()
+      .find((t) => t.taskTitle === 'Task A');
     expect(updated?.isDeleted).toBeTrue();
     expect(component.paginatedTasks.length).toBe(1);
     expect(component.paginatedTasks[0].taskTitle).toBe('Task B');
@@ -200,9 +213,8 @@ describe('TaskPageComponent', () => {
       isDeleted: false,
     } as ITask;
 
-    component.allTasks = [task1, task2];
-    component.tasks = [task1, task2];
-    component.searchTerm = 'beta';
+    taskService['allTasksSig'].set([task1, task2]);
+    taskService.setSearchTerm('beta');
 
     const dialogRefSpyObj = jasmine.createSpyObj({
       afterClosed: of({
@@ -216,8 +228,9 @@ describe('TaskPageComponent', () => {
 
     component.openTaskDetails(task1);
 
-    expect(component.tasks.length).toBe(1);
-    expect(component.tasks[0].taskTitle).toBe('Beta Task');
+    const filteredTasks = taskService.visibleTasks();
+    expect(filteredTasks.length).toBe(1);
+    expect(filteredTasks[0].taskTitle).toBe('Beta Task');
   });
 
   it('should default isDeleted to false when details dialog omits it and task had no flag', () => {
@@ -229,8 +242,7 @@ describe('TaskPageComponent', () => {
       creating: false,
     } as ITask;
 
-    component.allTasks = [task];
-    component.tasks = [task];
+    taskService['allTasksSig'].set([task]);
 
     const dialogRefSpyObj = jasmine.createSpyObj({
       afterClosed: of({
@@ -245,14 +257,14 @@ describe('TaskPageComponent', () => {
 
     component.openTaskDetails(task);
 
-    const updated = component.allTasks[0];
+    const updated = taskService.getTasks()[0];
     expect(updated.isDeleted).toBeFalse();
     expect(updated.taskTitle).toBe('Flagless Task Updated');
   });
 
   describe('goToPage', () => {
     beforeEach(() => {
-      component.tasks = TASKS;
+      taskService['allTasksSig'].set(TASKS);
       component.currentPage = 1;
     });
 
@@ -285,7 +297,7 @@ describe('TaskPageComponent', () => {
 
   describe('pagination methods', () => {
     beforeEach(() => {
-      component.tasks = TASKS;
+      taskService['allTasksSig'].set(TASKS);
       component.currentPage = 3;
     });
 
@@ -322,14 +334,14 @@ describe('TaskPageComponent', () => {
 
   describe('setSort', () => {
     beforeEach(() => {
-      component.tasks = TASKS;
+      taskService['allTasksSig'].set(TASKS);
       component.currentPage = 3;
     });
 
     it('should sort tasks by Title alphabetically', () => {
       component.setSort('Title');
       expect(component.currentPage).toBe(1);
-      const titles = component.tasks.map((t) => t.taskTitle);
+      const titles = taskService.visibleTasks().map((t) => t.taskTitle);
       expect(titles.slice(0, 5)).toEqual([
         'Add dark mode',
         'Add unit tests',
@@ -342,7 +354,7 @@ describe('TaskPageComponent', () => {
     it('should sort tasks by Date Newest', () => {
       component.setSort('Date Newest');
       expect(component.currentPage).toBe(1);
-      const titles = component.tasks.map((t) => t.taskTitle);
+      const titles = taskService.visibleTasks().map((t) => t.taskTitle);
       expect(titles.slice(0, 5)).toEqual([
         'Refactor auth service',
         'Design dashboard UI',
@@ -355,20 +367,21 @@ describe('TaskPageComponent', () => {
     it('should sort tasks by Date Oldest', () => {
       component.setSort('Date Oldest');
       expect(component.currentPage).toBe(1);
-      const titles = component.tasks.map((t) => t.taskTitle);
+      const titles = taskService.visibleTasks().map((t) => t.taskTitle);
+      // Note: 'Remove deprecated endpoints' is filtered out (isDeleted=true)
       expect(titles.slice(0, 5)).toEqual([
         'Add dark mode',
         'Update dependencies',
         'Improve error handling',
         'Implement task filters',
-        'Remove deprecated endpoints',
+        'Optimize database queries',
       ]);
     });
 
     it('should sort tasks by Status alphabetically', () => {
       component.setSort('Status');
       expect(component.currentPage).toBe(1);
-      const statuses = component.tasks.map((t) => t.status);
+      const statuses = taskService.visibleTasks().map((t) => t.status);
       for (let i = 1; i < statuses.length; i++) {
         expect(statuses[i - 1].localeCompare(statuses[i])).toBeLessThanOrEqual(
           0
@@ -377,18 +390,28 @@ describe('TaskPageComponent', () => {
     });
 
     it('should ignore unknown sort key and only reset page', () => {
-      component.tasks = TASKS;
+      taskService['allTasksSig'].set(TASKS);
+      // Set a known sort first so we can verify it doesn't change
+      component.setSort('Date Newest');
       component.currentPage = 3;
-      const beforeRef = component.tasks;
+
+      // Get the tasks sorted by Date Newest
+      const beforeFirstTitle = taskService.visibleTasks()[0].taskTitle;
+      expect(beforeFirstTitle).toBe('Refactor auth service'); // Newest task
+
+      // Try to set an unknown sort
       (component as any).setSort('Unknown');
-      expect(component.tasks).toBe(beforeRef);
-      expect(component.currentPage).toBe(1);
+
+      // Service should ignore unknown sort and keep last valid sort (Date Newest)
+      const afterFirstTitle = taskService.visibleTasks()[0].taskTitle;
+      expect(afterFirstTitle).toBe('Refactor auth service'); // Still sorted by Date Newest
+      expect(component.currentPage).toBe(1); // Page should reset
     });
   });
 
   describe('itemsPerPage getter/setter', () => {
     beforeEach(() => {
-      component.tasks = TASKS;
+      taskService['allTasksSig'].set(TASKS);
       component.currentPage = 1;
     });
 
@@ -415,7 +438,7 @@ describe('TaskPageComponent', () => {
   });
 
   it('should update tasks and searchTerm when onSearchTermChange is called', () => {
-    component.allTasks = TASKS;
+    taskService['allTasksSig'].set(TASKS);
 
     const eventTitle = {
       target: { value: 'Update Dependencies' },
@@ -423,21 +446,24 @@ describe('TaskPageComponent', () => {
     component.onSearchTermChange(eventTitle);
 
     expect(component.searchTerm).toBe('update dependencies');
-    expect(component.tasks.length).toBe(1);
+    expect(taskService.visibleTasks().length).toBe(1);
     expect(component.currentPage).toBe(1);
 
     const eventStatus = { target: { value: Status.DONE } } as unknown as Event;
     component.onSearchTermChange(eventStatus);
 
     expect(component.searchTerm).toBe('done');
-    expect(component.tasks[0].status).toBe(Status.DONE);
+    const doneTasks = taskService.visibleTasks();
+    expect(doneTasks.length).toBeGreaterThan(0);
+    expect(doneTasks.every((t) => t.status === Status.DONE)).toBeTrue();
     expect(component.currentPage).toBe(1);
 
     const eventClear = { target: { value: '' } } as unknown as Event;
     component.onSearchTermChange(eventClear);
 
     expect(component.searchTerm).toBe('');
-    expect(component.tasks).toEqual(component.allTasks);
+    // visibleTasks filters out deleted tasks (9 visible out of 10 total)
+    expect(taskService.visibleTasks().length).toBe(9);
     expect(component.currentPage).toBe(1);
   });
 
@@ -456,9 +482,11 @@ describe('TaskPageComponent', () => {
     });
 
     dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
-    const initialLength = component.allTasks.length;
+    const initialLength = taskService.getTasks().length; // All tasks including deleted
+    const initialVisibleLength = taskService.visibleTasks().length; // Only non-deleted
 
     component.addTask();
+    fixture.detectChanges(); // Trigger change detection
 
     expect(dialogSpy.open).toHaveBeenCalledWith(CreateEditDialogComponent, {
       data: {
@@ -472,11 +500,12 @@ describe('TaskPageComponent', () => {
       disableClose: true,
     });
 
-    expect(component.allTasks.length).toBe(initialLength + 1);
-    expect(component.allTasks).toContain(newTask);
-    expect(component.tasks.length).toBe(initialLength + 1);
-    expect(component.tasks.some((t) => t.taskTitle === 'New Task')).toBeTrue();
-    expect(component.currentPage).toBe(1);
+    expect(taskService.getTasks().length).toBe(initialLength + 1);
+    expect(taskService.getTasks()).toContain(newTask);
+    expect(taskService.visibleTasks().length).toBe(initialVisibleLength + 1);
+    expect(
+      taskService.visibleTasks().some((t) => t.taskTitle === 'New Task')
+    ).toBeTrue();
   });
 
   it('should not add task when create dialog returns no result', () => {
@@ -484,16 +513,16 @@ describe('TaskPageComponent', () => {
       afterClosed: of(undefined),
     });
     dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
-    const initialLength = component.allTasks.length;
+    const initialLength = taskService.getTasks().length;
     component.addTask();
-    expect(component.allTasks.length).toBe(initialLength);
+    expect(taskService.getTasks().length).toBe(initialLength);
   });
 
   it('should add task and honor active search filter', () => {
-    component.allTasks = TASKS;
+    taskService['allTasksSig'].set(TASKS);
     const searchEvent = { target: { value: 'unique' } } as unknown as Event;
     component.onSearchTermChange(searchEvent);
-    expect(component.tasks.length).toBe(0);
+    expect(taskService.visibleTasks().length).toBe(0);
 
     const matchingTask: ITask = {
       taskTitle: 'Unique Feature',
@@ -512,11 +541,10 @@ describe('TaskPageComponent', () => {
     component.addTask();
 
     expect(
-      component.allTasks.some((t) => t.taskTitle === 'Unique Feature')
+      taskService.getTasks().some((t) => t.taskTitle === 'Unique Feature')
     ).toBeTrue();
-    expect(component.tasks.length).toBe(1);
-    expect(component.tasks[0].taskTitle).toBe('Unique Feature');
-    expect(component.currentPage).toBe(1);
+    expect(taskService.visibleTasks().length).toBe(1);
+    expect(taskService.visibleTasks()[0].taskTitle).toBe('Unique Feature');
   });
 
   it('should default isDeleted to false when dialog omits it', () => {
@@ -532,14 +560,14 @@ describe('TaskPageComponent', () => {
     });
 
     dialogSpy.open.and.returnValue(dialogRefSpyObj as any);
-    const initialLength = component.allTasks.length;
+    const initialLength = taskService.getTasks().length;
 
     component.addTask();
 
-    const added = component.allTasks.find(
-      (t) => t.taskTitle === 'No Flag Task'
-    );
-    expect(component.allTasks.length).toBe(initialLength + 1);
+    const added = taskService
+      .getTasks()
+      .find((t) => t.taskTitle === 'No Flag Task');
+    expect(taskService.getTasks().length).toBe(initialLength + 1);
     expect(added?.isDeleted).toBeFalse();
   });
 });

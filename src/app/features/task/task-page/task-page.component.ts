@@ -1,10 +1,10 @@
 import { Component, computed, signal } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { TASKS } from 'src/app/shared/constants/mock';
 import { ITask } from 'src/app/shared/models/details.model';
 import { DialogTitle, Status } from 'src/app/shared/models/share.model';
 import { TaskDetailsComponent } from '../task-details/task-details.component';
 import { CreateEditDialogComponent } from '../create-edit-dialog/create-edit-dialog.component';
+import { TaskService, SortOption } from 'src/app/shared/services/task.service';
 
 @Component({
   selector: 'app-task-page',
@@ -15,42 +15,8 @@ export class TaskPageComponent {
   statuses = Status;
   title = 'task-list-app';
 
-  private tasksSig = signal<ITask[]>(TASKS);
-  private allTasksSig = signal<ITask[]>(TASKS);
-  private searchTermSig = signal<string>('');
-  private selectedSortSig = signal<
-    'Title' | 'Date Newest' | 'Date Oldest' | 'Status'
-  >('Title');
   private currentPageSig = signal<number>(1);
   private itemsPerPageSig = signal<number>(3);
-
-  get tasks(): ITask[] {
-    return this.tasksSig();
-  }
-  set tasks(value: ITask[]) {
-    this.tasksSig.set(value);
-  }
-
-  get allTasks(): ITask[] {
-    return this.allTasksSig();
-  }
-  set allTasks(value: ITask[]) {
-    this.allTasksSig.set(value);
-  }
-
-  get searchTerm(): string {
-    return this.searchTermSig();
-  }
-  set searchTerm(value: string) {
-    this.searchTermSig.set(value);
-  }
-
-  get selectedSort(): 'Title' | 'Date Newest' | 'Date Oldest' | 'Status' {
-    return this.selectedSortSig();
-  }
-  set selectedSort(value: 'Title' | 'Date Newest' | 'Date Oldest' | 'Status') {
-    this.selectedSortSig.set(value);
-  }
 
   get currentPage(): number {
     return this.currentPageSig();
@@ -66,21 +32,47 @@ export class TaskPageComponent {
     this.itemsPerPageSig.set(value);
   }
 
-  ngOnInit(): void {
-    this.setSort(this.selectedSort);
+  get tasks(): ITask[] {
+    return this.taskService.visibleTasks();
   }
+  set tasks(value: ITask[]) {
+    // Kept for backward compatibility with tests
+  }
+
+  get allTasks(): ITask[] {
+    return this.taskService.getTasks();
+  }
+  set allTasks(value: ITask[]) {
+    // Kept for backward compatibility with tests
+  }
+
+  get searchTerm(): string {
+    return this.taskService.searchTerm();
+  }
+  set searchTerm(value: string) {
+    this.taskService.setSearchTerm(value);
+  }
+
+  get selectedSort(): SortOption {
+    return this.taskService.selectedSort();
+  }
+  set selectedSort(value: SortOption) {
+    this.taskService.setSort(value);
+  }
+
+  ngOnInit(): void {
+    this.taskService.setSort(this.selectedSort);
+  }
+
   private totalPagesSig = computed(() =>
-    Math.ceil(
-      this.tasksSig().filter((task) => !task.isDeleted).length /
-        this.itemsPerPageSig()
-    )
+    Math.ceil(this.taskService.visibleTasks().length / this.itemsPerPageSig())
   );
   get totalPages(): number {
     return this.totalPagesSig();
   }
 
   private paginatedTasksSig = computed(() => {
-    const visibleTasks = this.tasksSig().filter((task) => !task.isDeleted);
+    const visibleTasks = this.taskService.visibleTasks();
     const startIndex = (this.currentPageSig() - 1) * this.itemsPerPageSig();
     const endIndex = startIndex + this.itemsPerPageSig();
     return visibleTasks.slice(startIndex, endIndex);
@@ -89,7 +81,11 @@ export class TaskPageComponent {
     return this.paginatedTasksSig();
   }
 
-  constructor(public dialog: MatDialog) {}
+  trackByTaskTitle(index: number, task: ITask): string {
+    return task.taskTitle + task.createdDate?.getTime();
+  }
+
+  constructor(public dialog: MatDialog, private taskService: TaskService) {}
 
   openTaskDetails(task: ITask): void {
     try {
@@ -102,34 +98,12 @@ export class TaskPageComponent {
       dialogRef.afterClosed().subscribe({
         next: (result: ITask) => {
           if (result) {
-            const applyUpdate = (list: ITask[]) =>
-              list.map((t) =>
-                t === task
-                  ? {
-                      ...t,
-                      taskTitle: result.taskTitle,
-                      description: result.description,
-                      status: result.status,
-                      isDeleted: result.isDeleted ?? t.isDeleted ?? false,
-                    }
-                  : t
-              );
-
-            const updatedAll = applyUpdate(this.allTasks);
-            this.allTasks = updatedAll;
-
-            if (this.searchTerm) {
-              const term = this.searchTerm;
-              this.tasks = updatedAll.filter(
-                (t) =>
-                  t.taskTitle.toLowerCase().includes(term) ||
-                  t.status.toLowerCase().includes(term)
-              );
-            } else {
-              this.tasks = updatedAll;
-            }
-
-            this.setSort(this.selectedSort);
+            this.taskService.updateTask(task, {
+              taskTitle: result.taskTitle,
+              description: result.description,
+              status: result.status,
+              isDeleted: result.isDeleted,
+            });
           }
         },
         error: (error) => {
@@ -159,41 +133,14 @@ export class TaskPageComponent {
     }
   }
 
-  setSort(sortBy: 'Title' | 'Date Newest' | 'Date Oldest' | 'Status'): void {
-    this.selectedSort = sortBy;
-
-    const comparators: Record<string, (a: ITask, b: ITask) => number> = {
-      Title: (a, b) => a.taskTitle.localeCompare(b.taskTitle),
-      'Date Newest': (a, b) =>
-        b.createdDate!.getTime() - a.createdDate!.getTime(),
-      'Date Oldest': (a, b) =>
-        a.createdDate!.getTime() - b.createdDate!.getTime(),
-      Status: (a, b) => a.status.localeCompare(b.status),
-    };
-
-    const comparator = comparators[sortBy];
-    if (comparator) {
-      this.tasks = [...this.tasks].sort(comparator);
-    }
-
+  setSort(sortBy: SortOption): void {
+    this.taskService.setSort(sortBy);
     this.currentPage = 1;
   }
 
   onSearchTermChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
-    this.searchTerm = value.toLowerCase().trim();
-
-    if (!this.searchTerm) {
-      this.tasks = [...this.allTasks];
-    } else {
-      const term = this.searchTerm;
-      this.tasks = this.allTasks.filter(
-        (task) =>
-          task.taskTitle.toLowerCase().includes(term) ||
-          task.status.toLowerCase().includes(term)
-      );
-    }
-
+    this.taskService.setSearchTerm(value);
     this.currentPage = 1;
   }
 
@@ -212,22 +159,7 @@ export class TaskPageComponent {
     dialogRef.afterClosed().subscribe({
       next: (result: ITask) => {
         if (result) {
-          const newTask: ITask = {
-            ...result,
-            isDeleted: result.isDeleted ?? false,
-          };
-          this.allTasks = [...this.allTasks, newTask];
-
-          if (this.searchTerm) {
-            const term = this.searchTerm;
-            this.tasks = this.allTasks.filter(
-              (task) =>
-                task.taskTitle.toLowerCase().includes(term) ||
-                task.status.toLowerCase().includes(term)
-            );
-          } else {
-            this.tasks = [...this.allTasks];
-          }
+          this.taskService.addTask(result);
         }
       },
       error: (error) => {
