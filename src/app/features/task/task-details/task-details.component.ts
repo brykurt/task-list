@@ -27,25 +27,34 @@ export class TaskDetailsComponent {
   ) {}
 
   openEditDialog() {
-    const dialogRef = this.dialog.open(CreateEditDialogComponent, {
-      data: {
-        dialogTitle: DialogTitle.EDIT,
-        taskTitle: this.data.taskTitle,
-        description: this.data.description,
-        status: this.data.status,
-        creating: false,
-      },
-      panelClass: 'dialog-content',
-      disableClose: true,
-    });
+    try {
+      const dialogRef = this.dialog.open(CreateEditDialogComponent, {
+        data: {
+          dialogTitle: DialogTitle.EDIT,
+          taskTitle: this.data.taskTitle,
+          description: this.data.description,
+          status: this.data.status,
+          creating: false,
+        },
+        panelClass: 'dialog-content',
+        disableClose: true,
+      });
 
-    dialogRef.afterClosed().subscribe((result: ITask) => {
-      if (result) {
-        this.taskTitle = result.taskTitle;
-        this.description = result.description;
-        this.status = result.status;
-      }
-    });
+      dialogRef.afterClosed().subscribe({
+        next: (result: ITask) => {
+          if (result) {
+            this.taskTitle = result.taskTitle;
+            this.description = result.description;
+            this.status = result.status;
+          }
+        },
+        error: (error) => {
+          console.error('Error editing task:', error);
+        },
+      });
+    } catch (error) {
+      console.error('Error opening edit dialog:', error);
+    }
   }
 
   closeDialog() {
@@ -58,13 +67,22 @@ export class TaskDetailsComponent {
   }
 
   openDeleteDialog() {
-    const dialogRef = this.dialog.open(ConfirmationModalComponent);
+    try {
+      const dialogRef = this.dialog.open(ConfirmationModalComponent);
 
-    dialogRef.afterClosed().subscribe((confirm: boolean) => {
-      if (confirm) {
-        this.data.isDeleted = true;
-        this.dialogRef.close(this.data);
-      }
-    });
+      dialogRef.afterClosed().subscribe({
+        next: (confirm: boolean) => {
+          if (confirm) {
+            this.data.isDeleted = true;
+            this.dialogRef.close(this.data);
+          }
+        },
+        error: (error) => {
+          console.error('Error deleting task:', error);
+        },
+      });
+    } catch (error) {
+      console.error('Error opening delete dialog:', error);
+    }
   }
 }

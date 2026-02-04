@@ -3,7 +3,9 @@
 <app-dialog-action-buttons
   secondaryLabel="Cancel"
   primaryLabel="Confirm"
-  primaryColor="primary"
+  primaryColor="warn"
+  secondaryAriaLabel="Cancel deletion and close dialog"
+  primaryAriaLabel="Confirm task deletion"
   (secondaryClick)="onClose(false)"
   (primaryClick)="onClose(true)"
 ></app-dialog-action-buttons>
