@@ -2,9 +2,11 @@
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.16.
 
+🌐 **Live Demo:** [https://brykurt.github.io/task-list/](https://brykurt.github.io/task-list/)
+
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+Run `npm start` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
 
 ## Code scaffolding
 
@@ -12,7 +14,33 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Run `npm run build` to build the project. The build artifacts will be stored in the `dist/` directory.
+
+## Deployment
+
+To deploy the application to GitHub Pages:
+
+```bash
+npm run deploy
+```
+
+This command will:
+
+1. Build the production app
+2. Deploy to the `gh-pages` branch
+3. Update your live site at [https://brykurt.github.io/task-list/](https://brykurt.github.io/task-list/)
+
+**Manual deployment commands:**
+
+```bash
+# Build the app
+npm run build
+
+# Deploy to GitHub Pages
+npx angular-cli-ghpages --dir=dist/task-list-app
+```
+
+**Note:** Make sure your GitHub Pages settings are configured to deploy from the `gh-pages` branch.
 
 ## Running unit tests
 
