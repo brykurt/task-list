@@ -32,6 +32,7 @@
           },
           "configurations": {
             "production": {
+              "baseHref": "/task-list/",
               "budgets": [
                 {
                   "type": "initial",
